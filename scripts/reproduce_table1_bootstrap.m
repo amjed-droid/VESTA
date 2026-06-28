@@ -8,7 +8,7 @@
 clear; clc; close all;
 
 disp('Loading dataset...');
-% Ensure the evaluation dataset is in the current working directory
+% Ensure the Supplementary_Table_C4 dataset is in the current working directory
 data = readtable('../data/Supplementary_Table_C4.csv');
 
 % Clean column names
