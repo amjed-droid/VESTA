@@ -1,6 +1,6 @@
-%% GENERATE_TABLE6 Extracts targeted segments for batch vetting examples.
+%% GENERATE_TABLE7 Extracts targeted segments for batch vetting examples.
 %
-%   GENERATE_TABLE6() extracts specific rows from the evaluation catalog
+%   GENERATE_TABLE7() extracts specific rows from the evaluation catalog
 %   (evaluation_dataset_v2.csv) based on a predefined list of target
 %   filenames or substrings. The output is saved as a CSV file for
 %   Table 6 in the manuscript, illustrating representative batch vetting
@@ -20,9 +20,9 @@
 %
 %   USAGE
 %   -----
-%   generate_table6()                  % Uses default target list and output filename.
-%   generate_table6(target_list)       % Uses a custom target list (cell array of strings).
-%   generate_table6(target_list, outfile) % Custom target list and output filename.
+%   generate_table7()                  % Uses default target list and output filename.
+%   generate_table7(target_list)       % Uses a custom target list (cell array of strings).
+%   generate_table7(target_list, outfile) % Custom target list and output filename.
 %
 %   DEFAULT TARGET LIST
 %   -------------------
@@ -95,7 +95,7 @@ function generate_table6(target_list, outfile)
         disp(table6_rows(:, disp_columns));
         
         % Write to CSV
-        writetable(table6_rows, outfile);
+        writetable(table7_rows, outfile);
         fprintf('\n Table 6 saved to: %s\n', outfile);
     end
 end
