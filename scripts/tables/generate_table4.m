@@ -1,6 +1,6 @@
-%% GENERATE_TABLE4 Computes and prints the DeLong exact test results.
+%% GENERATE_TABLE5 Computes and prints the DeLong exact test results.
 %
-%   GENERATE_TABLE4() reads the evaluation_dataset_v2.csv, applies the
+%   GENERATE_TABLE5() reads the evaluation_dataset_v2.csv, applies the
 %   standard quality filtering (N_in >= 30, valid labels and SNR),
 %   computes the DeLong exact test comparing the isolated logarithmic
 %   penalty (-P) against each raw SNR metric, and prints the results
@@ -90,7 +90,7 @@ end
 
 %% --- 4. PRINT RESULTS TO COMMAND WINDOW ---
 fprintf('\n==============================================================\n');
-fprintf('        TABLE 4: DELONG EXACT TEST RESULTS (N = %d)\n', n_valid);
+fprintf('        TABLE 5: DELONG EXACT TEST RESULTS (N = %d)\n', n_valid);
 fprintf('==============================================================\n');
 fprintf('%-20s | %-8s | %-6s | %-10s\n', 'Comparison', 'ΔAUC', 'z', 'p');
 fprintf('--------------------------------------------------------------\n');
