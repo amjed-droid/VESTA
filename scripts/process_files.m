@@ -1,0 +1,108 @@
+function results = process_files(cfg)
+    rng(42);
+    
+    % --- 3. FILE DISCOVERY ---
+    tess_files = dir(fullfile(cfg.tess_folder, '*.fits'));
+    bbs_files  = [dir(fullfile(cfg.bbs_folder, '*.csv')); dir(fullfile(cfg.bbs_folder, '*.xlsx'))];
+    n_tess = length(tess_files);
+    n_bbs  = length(bbs_files);
+    n_total = n_tess + n_bbs;
+    fprintf('TESS: %d | BBS: %d | Total: %d\n', n_tess, n_bbs, n_total);
+
+    % --- 4. RESULTS TABLE PREALLOCATION ---
+    varNames = {'Filename','SourceType','Label','Label_Source', ...
+                'N_total','N_in','N_out','Depth_ppm', ...
+                'T_SNR','R_SNR','P_SNR','B_SNR','L_SNRAS', ...
+                'Psi','Penalty_pct','Suppression_pct','Tier', ...
+                'Transit_Expected','T_start_BTJD','T_end_BTJD'};
+    varTypes = {'string','string','double','string', ...
+                'double','double','double','double', ...
+                'double','double','double','double','double', ...
+                'double','double','double','string', ...
+                'double','double','double'};
+    results = table('Size',[n_total, numel(varNames)], ...
+                    'VariableTypes', varTypes, 'VariableNames', varNames);
+    row = 0;
+
+    % --- 5. PROCESS TESS (.fits) ---
+    fprintf('\n--- Processing TESS (.fits) ---\n');
+    for i = 1:n_tess
+        fName = tess_files(i).name;
+        filePath = fullfile(cfg.tess_folder, fName);
+        try
+            data = fitsread(filePath, 'binarytable');
+            time_raw = [];
+            if size(data,2) >= 1, time_raw = double(data{1}); end
+            if size(data,2) >= 8, flux = double(data{8}); else, flux = double(data{2}); end
+            if ~isempty(time_raw) && length(time_raw) == length(flux)
+                valid_idx = ~isnan(flux) & ~isnan(time_raw);
+                time_clean = time_raw(valid_idx);
+                flux = flux(valid_idx);
+            else
+                time_clean = [];
+                flux = flux(~isnan(flux));
+            end
+            if isempty(flux), continue; end
+            
+            name_lower = lower(fName);
+            [label, label_source, transit_expected] = get_label(name_lower, ...
+                time_clean, cfg.T0_btjd, cfg.Period, cfg.T_margin, ...
+                cfg.artifact_keywords, cfg.complex_keywords, cfg.other_confirmed);
+            
+            if ~isempty(time_clean)
+                t_start = min(time_clean); t_end = max(time_clean);
+            else
+                t_start = NaN; t_end = NaN;
+            end
+            
+            row = row + 1;
+            results = compute_and_store(results, row, fName, 'TESS_fits', flux, ...
+                label, label_source, transit_expected, t_start, t_end, ...
+                cfg.tier1_cut, cfg.tier2_cut, time_clean, cfg.T0_btjd, cfg.Period, cfg.T_dur);
+            
+            fprintf('[%d/%d] %-55s Label=%s (%s)\n', row, n_total, fName, num2str(label), label_source);
+        catch ME
+            fprintf('Error: %s -> %s\n', fName, ME.message);
+            continue;
+        end
+    end
+
+    % --- 6. PROCESS BBS (.csv/.xlsx) ---
+    fprintf('\n--- Processing BBS (csv/xlsx) ---\n');
+    for i = 1:n_bbs
+        fName = bbs_files(i).name;
+        filePath = fullfile(cfg.bbs_folder, fName);
+        try
+            if endsWith(lower(fName), '.xlsx')
+                T = readtable(filePath);
+            else
+                T = readtable(filePath, 'FileType','text');
+            end
+            varNL = lower(strrep(T.Properties.VariableNames,'_',''));
+            flux_idx = find(contains(varNL,'flux') & ~contains(varNL,'err'), 1);
+            if isempty(flux_idx), flux_idx = find(contains(varNL,'flux'), 1); end
+            flux = double(T.(T.Properties.VariableNames{flux_idx}));
+            flux = flux(~isnan(flux));
+            if isempty(flux), continue; end
+            
+            name_lower = lower(fName);
+            [label, label_source, transit_expected] = get_label(name_lower, ...
+                [], cfg.T0_btjd, cfg.Period, cfg.T_margin, ...
+                cfg.artifact_keywords, cfg.complex_keywords, cfg.other_confirmed);
+            
+            row = row + 1;
+            results = compute_and_store(results, row, fName, 'BBS_csv', flux, ...
+                label, label_source, transit_expected, NaN, NaN, ...
+                cfg.tier1_cut, cfg.tier2_cut, [], cfg.T0_btjd, cfg.Period, cfg.T_dur);
+            
+            fprintf('[%d/%d] %-55s Label=%s (%s)\n', row, n_total, fName, num2str(label), label_source);
+        catch ME
+            fprintf('Error: %s -> %s\n', fName, ME.message);
+            continue;
+        end
+    end
+    
+    results = results(1:row, :);
+    writetable(results, 'evaluation_dataset_v2.csv');
+    fprintf('\nSaved: evaluation_dataset_v2.csv (%d rows)\n', height(results));
+end
