@@ -1,6 +1,6 @@
-%% GENERATE_TABLE5 Extracts case study results for Table 5.
+%% GENERATE_TABLE6 Extracts case study results for Table 5.
 %
-%   GENERATE_TABLE5() reads the evaluation_dataset_v2.csv and extracts
+%   GENERATE_TABLE6() reads the evaluation_dataset_v2.csv and extracts
 %   specific segments representing Tier 1, Tier 2, and Tier 3 validation
 %   cases. It computes the logarithmic penalty P (P = ln(1+ψ) = Penalty/100)
 %   and exports the results as a CSV file for Table 5.
@@ -23,13 +23,13 @@
 %   ------
 %   target_list : (Optional) Cell array of strings to search for in
 %                 the 'Filename' column. Defaults to the manuscript's
-%                 Table 5 targets.
+%                 Table 6 targets.
 %   outfile     : (Optional) Name of the output CSV file. Default:
 %                 'Table5_CaseStudies.csv'.
 %
 %   OUTPUTS
 %   -------
-%   CSV File : Table5_CaseStudies.csv with columns:
+%   CSV File : Table6_CaseStudies.csv with columns:
 %              Filename, T_SNR, R_SNR, L_SNRAS, P, Suppression_pct, Tier.
 %   Command Window Output : Formatted summary of the extracted segments.
 %
@@ -99,7 +99,7 @@ function generate_table5(target_list, outfile)
         disp(table5_rows(:, disp_columns));
         
         % Write to CSV
-        writetable(table5_rows(:, disp_columns), outfile);
+        writetable(table6_rows(:, disp_columns), outfile);
         fprintf('\n Table 5 saved to: %s\n', outfile);
     end
 end
