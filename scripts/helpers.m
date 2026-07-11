@@ -1,9 +1,39 @@
-% =========================================================
-%  Helper functions 
-%  =========================================================
+
 
 function [label, label_source, transit_expected] = get_label(name_lower, ...
     time_btjd, T0, Period, T_margin, artifact_kw, complex_kw, other_confirmed_kw)
+
+    %% HELPERS Utility and helper functions for the Log-SNRAS pipeline.
+%
+%   This file contains three core auxiliary functions used throughout the
+%   evaluation pipeline. They are separated to keep the main scripts
+%   concise and to ensure reproducibility by isolating algorithmic logic.
+%
+%   CONTENTS
+%   --------
+%   1. GET_LABEL      : Assigns the independent ground-truth label (1, 0, NaN)
+%                       based on ephemeris for TIC 261136679, and on literature
+%                       keyword matching for all other targets.
+%   2. COMPUTE_AND_STORE : Computes all candidate vetting metrics
+%                       (Traditional SNR, Robust SNR, PONT SNR, BLS SNR,
+%                       Log-SNRAS, Psi, Penalty_pct) and populates the
+%                       evaluation table row.
+%   3. DELONGEXACT    : Implements the analytic DeLong exact test for
+%                       comparing two correlated ROC curves, returning the
+%                       z-score and two-sided p-value.
+%
+%   AUTHOR
+%   ------
+%   Ahmed Sattar Jabbar.
+%
+%   SEE ALSO
+%   --------
+%   calculate_log_snras
+
+% -------------------------------------------------------------
+%  Function: get_label
+% -------------------------------------------------------------
+
     transit_expected = 0;
     if contains(name_lower, '261136679')
         if ~isempty(time_btjd) && any(~isnan(time_btjd))
