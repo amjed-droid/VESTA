@@ -16,8 +16,13 @@ $$\text{Log-SNRAS} = \frac{\delta}{\sigma_{out}} \times \frac{\sqrt{N_{in}}}{1 +
 ## Repository Structure
 To facilitate usage and reproducibility, the repository is organized as follows:
 * `src/` : Contains the core standalone function (`calculate_log_snras.m`).
-* `scripts/` : Contains MATLAB scripts to reproduce figures and tables.
-* `data/` : Contains the curated evaluation catalog (`Supplementary_Table_C4.csv`).
+* `data/` : Contains the curated evaluation catalog (`evaluation_dataset_v2.csv`).
+* `docs/` : Contains documentation and validation files.
+* `scripts/` : Organized subdirectories containing MATLAB scripts:
+  * `pipeline/` : Entrypoint orchestration (`main_pipeline.m`) and file ingestion pipeline (`process_files.m`).
+  * `tables/` : Scripts (`generate_table1.m` through `generate_table6.m`) to generate each respective table's data and LaTeX/plain-text output.
+  * `plots/` : Scripts to generate the ROC curves, response surfaces, and diagnostic figures.
+  * `utils/` : Shared configurations, helpers, and statistical functions (DeLong exact tests, bootstrap).
 
 ## Installation
 The code requires no compilation. You only need a standard MATLAB environment.
@@ -56,16 +61,20 @@ A major strength of this work is its complete reproducibility. This repository c
 3. **Random Seed**: A fixed seed (`rng(42)`) is explicitly set in the scripts for the stratified bootstrap resampling ($B=2000$) to guarantee exact reproduction.
 4. **Release Tag**: The results correspond to the `v1.1-revised` tag.
 
-## Figure Generation & Scripts (Located in `/scripts`)
-1. **`reproduce_table3_roc.m`**: Loads the pre-processed dataset, executes a stratified bootstrap ($B=2000$) to calculate Mean AUC and 95% CIs (Table 3), and generates the high-resolution empirical ROC curve (Figure 2).
-2. **`generate_table2_stats.m`**: Extracts empirical class balance and median penalty values (Table 2).
-3. **`plot_3d_surface.m`**: Regenerates the 3D response surface mapping theoretical penalty behavior (Figure 1).
+## Figure & Table Generation (Located in `/scripts`)
+All figures and tables presented in the manuscript can be reproduced using the scripts under the `/scripts` directory:
+1. **Tables (under `/scripts/tables`)**:
+   * `generate_table1.m` through `generate_table6.m` to generate each respective table's data and LaTeX/plain-text output.
+2. **Figures (under `/scripts/plots`)**:
+   * `plot_results.m` and `generate_baseline_figure.m` to generate the empirical ROC curves and comparison figures.
+   * `plot_3d_surface.m` to regenerate the 3D response surface mapping the theoretical penalty behavior.
+   * `generate_scatter_plot.m` to create the metric stability mapping.
 
 ## Data Preparation & Pre-processing
 Light curves evaluated in the empirical benchmark were downloaded from MAST, utilizing the PDCSAP flux column. The in-transit window is defined as the interval $\pm T_{dur}/2$ centered on the BLS mid-transit time, while the out-of-transit window utilizes the remaining points after removing a $2 \times T_{dur}$ buffer on each side.
 
 * **Note on NaNs**: NaN values in the dataset correspond to segments with insufficient in-transit points ($N_{in} < 10$) and were excluded to prevent undefined behavior.
-* **Note on ROC curves**: All ROC curves (including T-SNR, R-SNR, P-SNR, B-SNR, and Log-SNRAS) are plotted using the real empirical data in the provided catalog `Supplementary_Table_C4.csv`.
+* **Note on ROC curves**: All ROC curves (including T-SNR, R-SNR, P-SNR, B-SNR, and Log-SNRAS) are plotted using the real empirical data in the provided catalog `evaluation_dataset_v2.csv`.
 
 ## Citation
 If you use Log-SNRAS in your research or pipeline, please cite our foundational paper:
