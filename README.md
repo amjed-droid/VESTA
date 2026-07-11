@@ -67,7 +67,7 @@ A major strength of this work is its complete reproducibility. This repository c
 ## Figure & Table Generation (Located in `/scripts`)
 All figures and tables presented in the manuscript can be reproduced using the scripts under the `/scripts` directory:
 1. **Tables (under `/scripts/tables`)**:
-   * `generate_table1.m` through `generate_table6.m` to generate each respective table's data and LaTeX/plain-text output.
+   * `generate_table1.m` through `generate_table7.m` to generate each respective table's data and LaTeX/plain-text output.
 2. **Figures (under `/scripts/plots`)**:
    * `plot_results.m` and `generate_baseline_figure.m` to generate the empirical ROC curves and comparison figures.
    * `plot_3d_surface.m` to regenerate the 3D response surface mapping the theoretical penalty behavior.
