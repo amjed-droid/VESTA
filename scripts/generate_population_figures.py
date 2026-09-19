@@ -360,13 +360,182 @@ def plot_fig5_tier_distribution():
     print(f"Saved: {p1}")
 
 
+def plot_fig6_case_studies_diagnostics():
+    """Fig 6: Diagnostic Case Studies: High-Cadence USP and Extreme TTVs."""
+    print("Generating Figure 6: Specialized Case Studies (Kepler-78 b and Kepler-36 c)...")
+    from scripts.evaluate_kepler_population import load_kepler_lightcurve_from_fits
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.6), dpi=300)
+
+    # (a) Kepler-78 b: USP World
+    ax1 = axes[0]
+    t78, f78 = load_kepler_lightcurve_from_fits('D:/nrebig/kepler/lightcurves/40_Kepler_78', max_files=8)
+    p78 = 0.35500745
+    t0_78 = 120.95984
+    dur_78 = 0.814 / 24.0
+
+    phase78 = ((t78 - t0_78) % p78) / p78
+    phase78[phase78 > 0.5] -= 1.0
+    dt_h_78 = phase78 * p78 * 24.0
+
+    win78 = np.abs(dt_h_78) < 2.0
+    t_w78 = dt_h_78[win78]
+    f_w78 = (f78[win78] - 1.0) * 1e6
+
+    bins78 = np.linspace(-2.0, 2.0, 35)
+    bc78 = 0.5 * (bins78[:-1] + bins78[1:])
+    bm78, be78 = [], []
+    for i in range(len(bins78)-1):
+        m = (t_w78 >= bins78[i]) & (t_w78 < bins78[i+1])
+        if np.sum(m) > 0:
+            bm78.append(np.median(f_w78[m]))
+            be78.append(np.std(f_w78[m]) / np.sqrt(np.sum(m)))
+        else:
+            bm78.append(np.nan)
+            be78.append(np.nan)
+
+    ax1.scatter(t_w78, f_w78, s=2, color='gray', alpha=0.18, rasterized=True, label='Kepler Cadences (N = 13,081)')
+    ax1.errorbar(bc78, bm78, yerr=be78, fmt='o-', color='#1f77b4', lw=2.0, markersize=4.5, capsize=2, label='Phase Binned (35 bins)')
+    ax1.axvspan(-0.814/2, 0.814/2, color='#2ca02c', alpha=0.15, label='Transit Duration (0.81 h)')
+
+    ax1.set_xlim(-2.0, 2.0)
+    ax1.set_ylim(-3500, 3500)
+    ax1.set_xlabel('Time from Mid-Transit (Hours)')
+    ax1.set_ylabel(r'Relative Flux $\Delta F / F_0$ (ppm)')
+    ax1.set_title('(a) Kepler-78 b: Ultra-Short-Period (P = 8.5 h)\nTier 1 Clean: Zero Penalty under Rapid Cadence Stacking')
+    ax1.grid(True, linestyle=':', alpha=0.5)
+
+    badge78 = (
+        'Kepler-78 b (USP Terrestrial)\n' +
+        r'$\delta = 220.0\ \mathrm{ppm},\ N_{\mathrm{in}} = 2618$' + '\n' +
+        r'$\sigma_{\mathrm{out}} = 2862.2\ \mathrm{ppm},\ \sigma_{\mathrm{in,res}} = 2855.3\ \mathrm{ppm}$' + '\n' +
+        r'$\psi_{\mathrm{corr}} = 0.002,\ \mathcal{P}_{\mathrm{corr}} = \mathbf{0.0024}$' + '\n' +
+        r'$\mathbf{Tier\ 1\ (Clean)}\ [99.8\%\ \mathrm{SNR\ Retained}]$'
+    )
+    ax1.text(0.04, 0.04, badge78, transform=ax1.transAxes, fontsize=8.2, verticalalignment='bottom',
+             bbox=dict(boxstyle='round,pad=0.4', facecolor='#e8f5e9', edgecolor='#2e7d32', lw=1.2, alpha=0.92))
+    ax1.legend(loc='upper right', fontsize=8, framealpha=0.9)
+
+    # (b) Kepler-36 c: Linear
+    t36, f36 = load_kepler_lightcurve_from_fits('D:/nrebig/kepler/lightcurves/34_Kepler_36', max_files=8)
+    p36 = 16.231917
+    t0_36 = 171.67758
+    dur_36 = 7.461 / 24.0
+
+    phase36_lin = ((t36 - t0_36) % p36) / p36
+    phase36_lin[phase36_lin > 0.5] -= 1.0
+    dt_h_36_lin = phase36_lin * p36 * 24.0
+
+    ax2 = axes[1]
+    win36 = np.abs(dt_h_36_lin) < 14.0
+    t_w36 = dt_h_36_lin[win36]
+    f_w36 = (f36[win36] - 1.0) * 1e6
+
+    bins36 = np.linspace(-14.0, 14.0, 35)
+    bc36 = 0.5 * (bins36[:-1] + bins36[1:])
+    bm36_lin, be36_lin = [], []
+    for i in range(len(bins36)-1):
+        m = (t_w36 >= bins36[i]) & (t_w36 < bins36[i+1])
+        if np.sum(m) > 0:
+            bm36_lin.append(np.median(f_w36[m]))
+            be36_lin.append(np.std(f_w36[m]) / np.sqrt(np.sum(m)))
+        else:
+            bm36_lin.append(np.nan)
+            be36_lin.append(np.nan)
+
+    ax2.scatter(t_w36, f_w36, s=3, color='gray', alpha=0.25, rasterized=True, label='Folded Points (Linear)')
+    ax2.errorbar(bc36, bm36_lin, yerr=be36_lin, fmt='s-', color='#d62728', lw=2.0, markersize=4.5, capsize=2, label='Linear Phase Binned')
+    ax2.axvspan(-7.461/2, 7.461/2, color='#d62728', alpha=0.15, label='Nominal Mask (7.46 h)')
+
+    ax2.set_xlim(-14.0, 14.0)
+    ax2.set_ylim(-850, 450)
+    ax2.set_xlabel('Time from Nominal Mid-Transit (Hours)')
+    ax2.set_ylabel(r'Relative Flux $\Delta F / F_0$ (ppm)')
+    ax2.set_title(r'(b) Kepler-36 c: Rigid Linear Ephemeris' + '\n' + r'Tier 3 Veto: $\pm 8$ h TTV Smearing Inflates Residuals')
+    ax2.grid(True, linestyle=':', alpha=0.5)
+
+    badge36_lin = (
+        'Kepler-36 c (Static Linear Fold)\n' +
+        r'$\delta_{\mathrm{true}} = 430.0\ \mathrm{ppm},\ \Delta t_{\mathrm{TTV}} \sim \pm 8\ \mathrm{h}$' + '\n' +
+        r'$\sigma_{\mathrm{out}} = 104.3\ \mathrm{ppm},\ \sigma_{\mathrm{in,res}} = 177.3\ \mathrm{ppm}$' + '\n' +
+        r'$\psi_{\mathrm{corr}} = 0.700,\ \mathcal{P}_{\mathrm{corr}} = \mathbf{0.5306}$' + '\n' +
+        r'$\mathbf{Tier\ 3\ (Veto)}\ [\mathrm{Diagnostic\ Flag\ for\ TTVs}]$'
+    )
+    ax2.text(0.04, 0.04, badge36_lin, transform=ax2.transAxes, fontsize=8.2, verticalalignment='bottom',
+             bbox=dict(boxstyle='round,pad=0.4', facecolor='#ffebee', edgecolor='#c62828', lw=1.2, alpha=0.92))
+    ax2.legend(loc='upper right', fontsize=8, framealpha=0.9)
+
+    # (c) Kepler-36 c: Dynamical
+    ax3 = axes[2]
+    t36_aligned = t36.copy()
+    for n in range(-5, 45):
+        t_nom = t0_36 + n * p36
+        mask_transit = np.abs(t36 - t_nom) < (dur_36 * 1.6)
+        if np.sum(mask_transit) >= 6:
+            t_sub = t36[mask_transit]
+            f_sub = f36[mask_transit]
+            t_center = t_sub[np.argmin(f_sub)]
+            shift = t_center - t_nom
+            if np.abs(shift) < (dur_36 * 1.3):
+                t36_aligned[mask_transit] -= shift
+
+    phase36_dyn = ((t36_aligned - t0_36) % p36) / p36
+    phase36_dyn[phase36_dyn > 0.5] -= 1.0
+    dt_h_36_dyn = phase36_dyn * p36 * 24.0
+
+    win36_dyn = np.abs(dt_h_36_dyn) < 14.0
+    t_w36_dyn = dt_h_36_dyn[win36_dyn]
+    f_w36_dyn = (f36[win36_dyn] - 1.0) * 1e6
+
+    bm36_dyn, be36_dyn = [], []
+    for i in range(len(bins36)-1):
+        m = (t_w36_dyn >= bins36[i]) & (t_w36_dyn < bins36[i+1])
+        if np.sum(m) > 0:
+            bm36_dyn.append(np.median(f_w36_dyn[m]))
+            be36_dyn.append(np.std(f_w36_dyn[m]) / np.sqrt(np.sum(m)))
+        else:
+            bm36_dyn.append(np.nan)
+            be36_dyn.append(np.nan)
+
+    ax3.scatter(t_w36_dyn, f_w36_dyn, s=3, color='gray', alpha=0.25, rasterized=True, label='Folded Points (Dynamical)')
+    ax3.errorbar(bc36, bm36_dyn, yerr=be36_dyn, fmt='o-', color='#2ca02c', lw=2.0, markersize=4.5, capsize=2, label='TTV-Aligned Binned')
+    ax3.axvspan(-7.461/2, 7.461/2, color='#2ca02c', alpha=0.15, label='Aligned Transit (7.46 h)')
+
+    ax3.set_xlim(-14.0, 14.0)
+    ax3.set_ylim(-850, 450)
+    ax3.set_xlabel('Time from TTV-Corrected Mid-Transit (Hours)')
+    ax3.set_ylabel(r'Relative Flux $\Delta F / F_0$ (ppm)')
+    ax3.set_title('(c) Kepler-36 c: Dynamical TTV-Corrected\nTier 1 Clean: Epoch Alignment Restores Stationary Baseline')
+    ax3.grid(True, linestyle=':', alpha=0.5)
+
+    badge36_dyn = (
+        'Kepler-36 c (TTV-Aligned Epochs)\n' +
+        r'$\delta_{\mathrm{true}} = 430.0\ \mathrm{ppm}\ (\mathrm{Sharp\ Profile})$' + '\n' +
+        r'$\sigma_{\mathrm{out}} = 104.3\ \mathrm{ppm},\ \sigma_{\mathrm{in,res}} = 106.1\ \mathrm{ppm}$' + '\n' +
+        r'$\psi_{\mathrm{corr}} \to 0.017,\ \mathcal{P}_{\mathrm{corr}} \to \mathbf{0.0168}$' + '\n' +
+        r'$\mathbf{Tier\ 1\ (Clean)}\ [\mathrm{Full\ Planetary\ Recovery}]$'
+    )
+    ax3.text(0.04, 0.04, badge36_dyn, transform=ax3.transAxes, fontsize=8.2, verticalalignment='bottom',
+             bbox=dict(boxstyle='round,pad=0.4', facecolor='#e8f5e9', edgecolor='#2e7d32', lw=1.2, alpha=0.92))
+    ax3.legend(loc='upper right', fontsize=8, framealpha=0.9)
+
+    fig.tight_layout()
+    p1 = os.path.join(OUT_DIR, 'Figure6_CaseStudies_Diagnostics.png')
+    p2 = 'Figure6_CaseStudies_Diagnostics.png'
+    fig.savefig(p1, dpi=600, bbox_inches='tight')
+    fig.savefig(p2, dpi=600, bbox_inches='tight')
+    plt.close(fig)
+    print(f"Saved: {p1}")
+
+
 def main():
     plot_fig1_response_surface()
     plot_fig2_depth_invariance()
     plot_fig3_phase_folded_archetypes()
     plot_fig4_population_roc()
     plot_fig5_tier_distribution()
-    print("\nAll 5 publication figures generated successfully at 600 DPI!")
+    plot_fig6_case_studies_diagnostics()
+    print("\nAll 6 publication figures generated successfully at 600 DPI!")
 
 if __name__ == '__main__':
     main()
