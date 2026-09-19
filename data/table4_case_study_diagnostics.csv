@@ -1,0 +1,12 @@
+Target_Name,Class,Depth_ppm,N_in,sigma_out_ppm,sigma_in_raw_ppm,sigma_in_res_ppm,psi_raw,psi_corr,penalty_raw,penalty_corr,Traditional_SNR,VESTA_Score,Assigned_Tier
+Kepler-45 b,Planet,32040.0,837,7510.3,12304.2,7305.4,0.638,0.027,0.494,0.0269,97.8,95.3,Tier 1 (Clean)
+Kepler-468 b,Planet,23530.0,84,4195.6,7068.3,4321.1,0.685,0.03,0.522,0.0295,29.1,28.2,Tier 1 (Clean)
+Kepler-148 d,Planet,10310.0,107,2192.6,3024.9,1773.4,0.38,0.191,0.322,0.175,30.5,26.0,Tier 2 (Review)
+Kepler-11 b,Planet,300.0,521,240.5,241.1,235.1,0.002,0.023,0.002,0.0223,26.0,25.4,Tier 1 (Clean)
+Kepler-10 b,Planet,190.0,2177,125.8,130.9,125.4,0.041,0.003,0.04,0.0033,58.8,58.6,Tier 1 (Clean)
+Kepler-37 b,Planet,12.0,311,287.6,276.7,276.4,0.038,0.039,0.037,0.0383,3.7,3.6,Tier 1 (Clean)
+Boyajian Star (Q8),Artifact,15000.0,215,3096.2,32339.3,22232.5,9.445,6.181,2.346,1.9714,107.2,36.1,Tier 3 (Veto)
+Boyajian Star (Q16),Artifact,200000.0,385,5139.4,48412.1,33999.3,8.42,5.615,2.243,1.8894,113.0,39.1,Tier 3 (Veto)
+KOI-1611 EB,Artifact,134484.0,368,1083.5,48162.6,3697.8,43.45,2.413,3.794,1.2275,1431.4,642.6,Tier 3 (Veto)
+V380 Cyg (KIC 5385723),Artifact,80000.0,211,28606.1,12383.2,12091.5,0.567,0.577,0.449,0.4557,0.0,0.0,Tier 3 (Veto)
+KIC 11253226,Artifact,25000.0,8891,126.5,126.4,126.3,0.001,0.002,0.001,0.0018,7.9,7.9,Tier 1 (Clean)
