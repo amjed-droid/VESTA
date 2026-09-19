@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software or benchmark catalog, please cite it as below."
+authors:
+  - family-names: "Jabbar"
+    given-names: "Ahmed Sattar"
+    email: "ahmed.state.me@gmail.com"
+    affiliation: "Department of Statistics, College of Administration and Economics, Mustansiriyah University, Baghdad, Iraq"
+title: "VESTA: A Depth-Invariant Variance-Stabilized Framework for Population-Scale Exoplanet Transit Vetting"
+version: 3.0.0
+date-released: 2026-09-19
+url: "https://github.com/amjed-droid/Log-SNRAS"
+repository-code: "https://github.com/amjed-droid/Log-SNRAS"
+keywords:
+  - exoplanets
+  - transit photometry
+  - time series analysis
+  - automated vetting
+  - signal processing
+  - astrostatistics
+  - kepler
+  - tess
+  - plato
+abstract: "Official Python implementation of VESTA (Variance-Evaluated Stability for Transit Analysis), a depth-invariant, variance-stabilized transit vetting framework benchmarked across four decades in Kepler light curves (N=56 population). Submitted to Astronomy and Computing."
