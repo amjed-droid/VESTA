@@ -69,8 +69,8 @@ VESTA maps candidate stability onto rigorous operational decision tiers calibrat
 ### Installation
 Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/astronomy/vesta.git
-cd vesta
+git clone https://github.com/amjed-droid/VESTA.git
+cd VESTA
 pip install -e .
 ```
 

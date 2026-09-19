@@ -8,8 +8,8 @@ authors:
 title: "VESTA: A Depth-Invariant Variance-Stabilized Framework for Population-Scale Exoplanet Transit Vetting"
 version: 3.0.0
 date-released: 2026-09-19
-url: "https://github.com/amjed-droid/Log-SNRAS"
-repository-code: "https://github.com/amjed-droid/Log-SNRAS"
+url: "https://github.com/amjed-droid/VESTA"
+repository-code: "https://github.com/amjed-droid/VESTA"
 keywords:
   - exoplanets
   - transit photometry

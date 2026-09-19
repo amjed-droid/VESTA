@@ -29,5 +29,5 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/amjed-droid/Log-SNRAS"
-"Bug Tracker" = "https://github.com/amjed-droid/Log-SNRAS/issues"
+"Homepage" = "https://github.com/amjed-droid/VESTA"
+"Bug Tracker" = "https://github.com/amjed-droid/VESTA/issues"
