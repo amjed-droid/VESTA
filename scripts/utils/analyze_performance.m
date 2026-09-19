@@ -1,4 +1,4 @@
-function [y_true_v, scores_inv, raw_auc, boot_pen, auc_penalty, n_valid] = analyze_performance(results)
+function [y_true_v, scores_inv, raw_auc, boot_pen, auc_penalty, n_valid, raw_scores_cell] = analyze_performance(results)
 %ANALYZE_PERFORMANCE Statistical validation pipeline for Log-SNRAS benchmarking.
 %
 %   [Y_TRUE_V, SCORES_INV, RAW_AUC, BOOT_PEN, AUC_PENALTY, N_VALID] = ...
@@ -81,9 +81,11 @@ function [y_true_v, scores_inv, raw_auc, boot_pen, auc_penalty, n_valid] = analy
     raw_cols    = {'T_SNR','R_SNR','P_SNR','B_SNR','L_SNRAS'};
     n_raw = length(raw_methods);
     raw_auc = zeros(n_raw,1);
+    raw_scores_cell = cell(n_raw, 1);
     for m = 1:n_raw
         scores = results.(raw_cols{m})(valid);
         scores(isnan(scores)) = 0;
+        raw_scores_cell{m} = scores;
         [~,~,~,raw_auc(m)] = perfcurve(y_true_v, scores, 1);
     end
 

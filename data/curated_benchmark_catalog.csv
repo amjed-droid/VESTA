@@ -1,0 +1,18 @@
+target_id,host_name,mission,sector_or_quarter,label,label_name,t0,period,duration_days,depth_ppm,literature_ref,author,notes
+TIC 261136679,Pi Mensae,TESS,1,1,Confirmed Planet,1325.503,6.26784,0.123,300,"Kunovac Hodzic et al. (2021, MNRAS 502, 2893)",,
+TIC 350618622,TOI-201,TESS,6,1,Confirmed Planet,1482.029,52.978,0.29,5300,"Hobson et al. (2021, AJ 161, 235)",,
+KIC 11904151,Kepler-10,Kepler,1,1,Confirmed Planet,131.574858,0.837491225,0.0748,190,"Batalha et al. (2011, ApJ 729, 27)",,
+KIC 5812701,Kepler-448,Kepler,4,1,Confirmed Planet,146.596466,17.855221681,0.3089,9065,"Bourrier et al. (2015, A&A 579, A55)",,
+KIC 11446443,TrES-2,Kepler,2,1,Confirmed Planet,122.763305,2.470613377,0.0726,14231,"O'Donovan et al. (2006, ApJ 651, L61)",,
+TIC 25155310,WASP-126,TESS,1,1,Confirmed Planet,1326.54,3.2888,0.11,9200,"Armstrong et al. (2014, MNRAS 444, 1873)",,
+TIC 410153553,TOI-540,TESS,1,1,Confirmed Planet,1325.503,1.239149,0.038,1500,"Ment et al. (2021, AJ 161, 23)",,
+TIC 307210830,L 98-59,TESS,2,1,Confirmed Planet,1354.904,2.25314,0.045,500,"Kostov et al. (2019, AJ 158, 32)",,
+KIC 6922244,Kepler-8,Kepler,2,1,Confirmed Planet,121.1194228,3.522498429,0.1332,9146,"Jenkins et al. (2010, ApJ 724, 1108)",,
+KIC 11804465,Kepler-11,Kepler,3,1,Confirmed Planet,171.0091259,4.437962934,0.1957,1639,"Lissauer et al. (2011, Nature 470, 53)",,
+KIC 8462852,Boyajian Star (Q8),Kepler,8,0,Non-Stationary Astrophysical Artifact,792.0,1000.0,4.5,15000,"Boyajian et al. (2016, MNRAS 457, 3988)",,
+KIC 8462852,Boyajian Star (Q16),Kepler,16,0,Non-Stationary Astrophysical Artifact,1520.0,1000.0,8.0,200000,"Boyajian et al. (2016, MNRAS 457, 3988)",,
+KIC 12644769,KOI-1611 EB,Kepler,2,0,Eclipsing Binary,173.7358974,41.077590334,0.2586,134484,"Prsa et al. (2011, AJ 141, 83)",,
+KIC 3858884,KIC 3858884,Kepler,3,0,Pulsating Binary,262.15,25.95,0.8,45000,"Maceroni et al. (2014, A&A 563, A106)",Kepler,Heartbeat star with tidally induced pulsations
+KIC 5385723,V380 Cyg (KIC 5385723),Kepler,4,0,Eclipsing Binary,355.2,12.425,0.65,80000,"Tkachenko et al. (2014, MNRAS 438, 3093)",Kepler,B-type eccentric eclipsing binary
+KIC 11253226,KIC 11253226,Kepler,2,0,Contact Binary,170.4,0.388,0.08,25000,"Kirk et al. (2016, AJ 151, 68)",Kepler,W UMa type contact binary
+TIC 441462308,V723 Mon,TESS,33,0,Ellipsoidal Variable,2200.0,59.9,5.0,30000,"Jayasinghe et al. (2021, MNRAS 504, 2577)",SPOC,"Red giant with black hole candidate companion (ellipsoidal variation, non-transit)"

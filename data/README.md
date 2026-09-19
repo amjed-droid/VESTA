@@ -1,50 +1,57 @@
-# Supplementary Data: Complete Evaluation Catalog
+# Benchmark Datasets and Evaluation Catalogs
 
-This directory contains the unified and pre-processed evaluation dataset used to validate the performance of the proposed **Log-SNRAS** algorithm against traditional and robust signal-to-noise ratio (SNR) baselines.
+This directory contains the data catalogs used to benchmark and evaluate **Log-SNRAS** against standard Signal-to-Noise Ratio (SNR) baselines.
 
-## File Contents
+---
 
+## 1. Curated Multi-Host Benchmark Catalog (Current Standard)
+### `curated_benchmark_catalog.csv`
+The primary benchmark catalog introduced in the revised manuscript to resolve the single-host confound and demonstrate host-invariant performance. It comprises **$N = 17$ distinct astrophysical systems**:
+* **10 Confirmed Exoplanets across 10 Distinct Hosts**:
+  * Pi Mensae c (TIC 261136679, S1)
+  * TOI-201 b (TIC 350618622, S4)
+  * Kepler-10 b (KIC 11904151, Q1)
+  * Kepler-448 b (KIC 5812701, Q1) — restored from literature
+  * TrES-2 b (KIC 11446443, Q1) — restored from literature
+  * WASP-126 b (TIC 25155310, S1)
+  * TOI-540 b (TIC 200322593, S6)
+  * L 98-59 b (TIC 307210830, S2)
+  * Kepler-8 b (KIC 6922244, Q2)
+  * Kepler-11 d (KIC 6541920, Q3)
+* **7 Literature-Proven Non-Planetary Artifacts**:
+  * Boyajian's Star (KIC 8462852, Q8 D792 deep anomalous dip)
+  * Boyajian's Star (KIC 8462852, Q16 D1500 complex dip)
+  * KOI-1611 (KIC 4544587, eccentric eclipsing binary)
+  * Kepler eccentric EB (KIC 12644769)
+  * W UMa contact binary (KIC 11253226)
+  * Kepler ellipsoidal variable (KIC 8016214)
+  * Kepler non-stationary EB (KIC 10001167)
+
+*Every target's ground-truth classification is verified against the NASA Exoplanet Archive and peer-reviewed literature.*
+
+### `multi_host_evaluation_results.csv`
+Contains the calculated metrics across all 17 benchmark targets, including:
+* Ingested from NASA MAST using explicit named column access (`PDCSAP_FLUX`).
+* Uniform orbital ephemeris transit masking with a $2\times T_{\text{dur}}$ buffer.
+* Shape-corrected in-transit dispersion ($\sigma_{\text{in, res}}$).
+* Comparative metrics: Traditional SNR, Robust MAD SNR, Pont SNR, BLS SNR proxy, and Inverse Depth ($1/\delta$).
+* Classified tiers (`Tier 1 Clean`, `Tier 2 Ambiguous`, `Tier 3 Veto`).
+
+### `multi_host_auc_performance.csv`
+Summary table reporting point AUCs, 95% stratified bootstrap confidence intervals ($B = 2000$), and Leave-One-Host-Out (LOHO) cross-validation scores.
+
+---
+
+## 2. Archival Catalog (Legacy)
 ### `evaluation_dataset_v2.csv`
-A comma-separated values (CSV) file containing the calculated Signal-to-Noise Ratio (SNR) metrics, spatial dispersion coefficients, morphological properties, and vetting outcomes for all $N = 180$ light curve segments in the benchmark catalog.
+* **Status**: Deprecated / Retained for Historical Provenance.
+* **Description**: This file represents the evaluation table from earlier revision rounds (R1–R4). It contains 180 light curve segments, of which 76 confirmed transit segments were derived from a single quiet host star (TIC 261136679 / Pi Mensae). As noted by Reviewer #5, this single-host concentration produced an apparent AUC of 0.960 that dropped when tested across diverse hosts.
+* **Resolution**: Replaced by `curated_benchmark_catalog.csv` ($N = 17$) and the shape-corrected metric, which achieves a host-invariant AUC of **0.757 $\pm$ 0.036**.
 
 ---
 
-## Column Descriptions
-
-1. **`Filename`**: The original filename of the light curve segment (FITS or CSV).
-2. **`SourceType`**: The data source type (e.g., `TESS_fits` or `BBS_csv`).
-3. **`Label`**: Ground truth diagnostic classification label (`1` = confirmed transit, `0` = false positive/literature artifact, `NaN` = complex/excluded).
-4. **`Label_Source`**: The source of the ground truth label (e.g., `literature_confirmed`, `literature_artifact`, `ephemeris_confirmed`, `complex_excluded`, `unknown_excluded`).
-5. **`N_total`**: Total number of data points (measurements) in the light curve.
-6. **`N_in`**: Number of data points falling inside the expected transit window.
-7. **`N_out`**: Number of data points falling outside the transit window.
-8. **`Depth_ppm`**: Transit depth in parts per million (ppm).
-9. **`T_SNR`**: Traditional Signal-to-Noise Ratio (T-SNR).
-10. **`R_SNR`**: Robust Signal-to-Noise Ratio (R-SNR) using Median Absolute Deviation (MAD).
-11. **`P_SNR`**: Pont et al. red-noise corrected SNR proxy.
-12. **`B_SNR`**: Box Least Squares (BLS) power proxy SNR.
-13. **`L_SNRAS`**: Proposed Log-SNRAS (local-variance penalized metric).
-14. **`Psi`**: Spatially-confined dispersion contrast ($\psi$) at the transit boundary.
-15. **`Penalty_pct`**: Adaptive variance penalty percentage applied to the traditional SNR.
-16. **`Suppression_pct`**: The signal suppression percentage under correction.
-17. **`Tier`**: Classified vetting tier outcome (`Tier 1`, `Tier 2`, or `Tier 3`).
-18. **`Transit_Expected`**: Binary indicator (0 or 1) showing whether a transit event is expected.
-19. **`T_start_BTJD`**: Observation start time in Barycentric TESS Julian Date (BTJD).
-20. **`T_end_BTJD`**: Observation end time in BTJD.
-
----
-
-## Reproducing Table 3 and ROC Curves
-
-The validation script `reproduce_table3_roc.m` in the repository's main directory is designed to run directly using this dataset. It loads the dataset, performs stratified bootstrap analysis ($B = 2000$), computes confidence intervals, prints performance summaries, and generates the final ROC curve.
-
-### How to Run:
-1. Ensure `reproduce_table3_roc.m` and `Data/evaluation_dataset_v2.csv` are in your MATLAB working path.
-2. In the script `reproduce_table3_roc.m`, make sure the file path points to the new dataset:
-   ```matlab
-   csv_file = 'Data/evaluation_dataset_v2.csv';
-   ```
-3. Run the script in the MATLAB Command Window:
-   ```matlab
-   reproduce_table3_roc
-   ```
+## Reproduction
+To evaluate the multi-host benchmark and regenerate the results:
+```bash
+python scripts/evaluate_multi_host_benchmark.py
+```
