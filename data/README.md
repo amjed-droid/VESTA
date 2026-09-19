@@ -42,6 +42,11 @@ Statistical performance summary reporting:
 ### `latex_catalog_table_clean.tex`
 LaTeX-formatted reference catalog table presenting all 56 benchmark systems, designed for direct inclusion in journal manuscripts.
 
+### Manuscript Tables (CSV Copies)
+* **`table2_representative_systems.csv`**: Data corresponding to Table 2 in Section 3, summarizing representative systems across the four depth strata and astrophysical false alarms.
+* **`table3_comparative_performance.csv`**: Data corresponding to Table 3 in Section 5, reporting AUC, 95% bootstrap confidence intervals, $\Delta\text{AUC}$, and DeLong $p$-values.
+* **`table4_case_study_diagnostics.csv`**: Data corresponding to Table 4 in Section 6, providing comprehensive quantitative diagnostics ($\sigma_{\text{out}}$, $\sigma_{\text{in, raw}}$, $\sigma_{\text{in, res}}$, $\psi$, $\mathcal{P}$, SNRs, and tier assignments) for 13 canonical systems, including USP worlds (Kepler-78 b) and extreme TTV resonant systems (Kepler-36 c).
+
 ---
 
 ## 2. Legacy Catalogs (Retained for Historical Provenance)
