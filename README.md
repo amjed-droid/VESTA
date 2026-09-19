@@ -120,7 +120,6 @@ VESTA/
 │   │   ├── masking.py              # Uniform ephemeris phase-folding
 │   │   ├── stats.py                # DeLong tests and stratified bootstrap CIs
 │   │   └── io.py                   # NASA MAST FITS loader
-│   └── calculate_vesta.m           # Standalone vectorized MATLAB implementation
 ├── data/
 │   ├── kepler_population_catalog.csv     # Primary 56-system benchmark catalog
 │   ├── kepler_population_results.csv     # Complete empirical evaluation metrics
