@@ -139,17 +139,27 @@ def plot_fig2_depth_invariance():
     ax.set_title('VESTA Depth-Invariance Across Four Decades (Kepler N=56 Population)')
     ax.grid(True, which='both', linestyle=':', alpha=0.5)
 
-    # Annotations for extreme benchmark systems
-    ax.annotate('Kepler-37 b\n(12 ppm)', xy=(12, 0.038), xytext=(15, 0.35),
-                arrowprops=dict(arrowstyle='->', lw=1.0, color='black'), fontsize=9, fontweight='bold')
-    ax.annotate('Kepler-10 b\n(190 ppm)', xy=(190, 0.003), xytext=(220, 0.30),
-                arrowprops=dict(arrowstyle='->', lw=1.0, color='black'), fontsize=9, fontweight='bold')
-    ax.annotate('Kepler-45 b\n(32,040 ppm)', xy=(32040, 0.0005), xytext=(40000, 0.40),
-                arrowprops=dict(arrowstyle='->', lw=1.0, color='black'), fontsize=9, fontweight='bold')
-    ax.annotate("Boyajian's Star Q8\n(Anomalous Dip)", xy=(15000, 1.97), xytext=(8000, 1.70),
-                arrowprops=dict(arrowstyle='->', lw=1.0, color='crimson'), fontsize=9, fontweight='bold', color='crimson')
+    # Annotations for extreme benchmark systems with background bounding boxes
+    box_props = dict(boxstyle='round,pad=0.25', facecolor='white', alpha=0.88, edgecolor='#888888', lw=0.7)
 
-    ax.legend(loc='upper left', fontsize=9, framealpha=0.9)
+    ax.annotate('Kepler-37 b\n(12 ppm)', xy=(12, 0.038), xytext=(15, 0.36),
+                arrowprops=dict(arrowstyle='->', lw=1.1, color='black'),
+                fontsize=8.5, fontweight='bold', bbox=box_props)
+
+    ax.annotate('Kepler-10 b\n(190 ppm)', xy=(190, 0.003), xytext=(115, 0.33),
+                arrowprops=dict(arrowstyle='->', lw=1.1, color='black'),
+                fontsize=8.5, fontweight='bold', bbox=box_props)
+
+    ax.annotate('Kepler-45 b\n(32,040 ppm)', xy=(32040, 0.0269), xytext=(50000, 0.22),
+                arrowprops=dict(arrowstyle='->', lw=1.1, color='black', connectionstyle="arc3,rad=-0.15"),
+                fontsize=8.5, fontweight='bold', bbox=box_props)
+
+    ax.annotate("Boyajian's Star Q8\n(Anomalous Dip)", xy=(15000, 1.97), xytext=(4500, 1.68),
+                arrowprops=dict(arrowstyle='->', lw=1.1, color='crimson'),
+                fontsize=8.5, fontweight='bold', color='crimson',
+                bbox=dict(boxstyle='round,pad=0.25', facecolor='white', alpha=0.88, edgecolor='crimson', lw=0.7))
+
+    ax.legend(loc='upper left', fontsize=9, framealpha=0.92)
 
     p1 = os.path.join(OUT_DIR, 'Figure2_DepthInvariance.png')
     p2 = 'Figure2_DepthInvariance.png'
