@@ -1,6 +1,6 @@
 """
-Publication Figure Generator for Log-SNRAS Manuscript
-=====================================================
+Publication Figure Generator for VESTA Manuscript
+=================================================
 Generates all high-resolution figures (600 DPI) using 100% real archival data,
 clean dimensionless axes, and calibrated tier contours.
 """
@@ -42,11 +42,11 @@ def plot_figure1_theory_surface():
     
     # Assume arbitrary reference raw SNR = 50
     snr_trad = 50.0
-    L_SNRAS = snr_trad / (1.0 + P)
+    L_VESTA = snr_trad / (1.0 + P)
 
-    cf = ax.contourf(SI * 1e3, SO * 1e3, L_SNRAS, levels=25, cmap='viridis')
+    cf = ax.contourf(SI * 1e3, SO * 1e3, L_VESTA, levels=25, cmap='viridis')
     cbar = fig.colorbar(cf, ax=ax)
-    cbar.set_label('Log-SNRAS Score', rotation=270, labelpad=15)
+    cbar.set_label('VESTA Score', rotation=270, labelpad=15)
 
     # Explicit Tier boundary contours
     cs1 = ax.contour(SI * 1e3, SO * 1e3, P, levels=[0.15], colors=['blue'], linestyles=['dotted'], linewidths=[1.8])
@@ -64,7 +64,7 @@ def plot_figure1_theory_surface():
 
     ax.set_xlabel('In-Transit Dispersion $\\sigma_{\\rm in} \\times 10^3$')
     ax.set_ylabel('Out-of-Transit Dispersion $\\sigma_{\\rm out} \\times 10^3$')
-    ax.set_title('Log-SNRAS Response Surface & Tier Boundaries')
+    ax.set_title('VESTA Response Surface & Tier Boundaries')
     plt.tight_layout()
 
     out_path = os.path.join(FIGURE_DIR, 'Figure1_ResponseSurface.png')
@@ -178,12 +178,12 @@ def plot_figure2_scatter():
     planets = df[df['label'] == 1]
     artifacts = df[df['label'] == 0]
 
-    ax.scatter(planets['t_snr'], planets['l_snras_corr'], color='#1f77b4', marker='o', s=60, edgecolors='black', label='Confirmed Planets (Multi-Host)')
-    ax.scatter(artifacts['t_snr'], artifacts['l_snras_corr'], color='#d62728', marker='s', s=60, edgecolors='black', label='Non-Planetary Artifacts')
+    ax.scatter(planets['t_snr'], planets['vesta_corr'], color='#1f77b4', marker='o', s=60, edgecolors='black', label='Confirmed Planets (Multi-Host)')
+    ax.scatter(artifacts['t_snr'], artifacts['vesta_corr'], color='#d62728', marker='s', s=60, edgecolors='black', label='Non-Planetary Artifacts')
 
     # Unity line
-    max_val = max(df['t_snr'].max(), df['l_snras_corr'].max()) * 1.05
-    ax.plot([0, max_val], [0, max_val], 'k--', lw=1.2, label='Unity Line ($L\\text{-SNRAS} = T\\text{-SNR}$)')
+    max_val = max(df['t_snr'].max(), df['vesta_corr'].max()) * 1.05
+    ax.plot([0, max_val], [0, max_val], 'k--', lw=1.2, label='Unity Line ($\\mathrm{VESTA} = T\\text{-SNR}$)')
 
     # Tier boundary lines: Tier 1/2 (D = 1 + 0.15 = 1.15 -> slope = 1/1.15 = 0.87)
     # Tier 2/3 (D = 1 + 0.60 = 1.60 -> slope = 1/1.60 = 0.625)
@@ -192,7 +192,7 @@ def plot_figure2_scatter():
     ax.plot(x_line, x_line / (1.0 + 0.60), 'r-.', lw=1.8, label='Tier 2/3 Boundary ($\\mathcal{P} = 0.60$)')
 
     ax.set_xlabel('Traditional SNR ($T\\text{-SNR}$)')
-    ax.set_ylabel('Variance-Stabilized Metric (Log-SNRAS)')
+    ax.set_ylabel('Variance-Stabilized Metric (VESTA)')
     ax.set_title('Empirical Diagnostic Mapping on Multi-Host Benchmark')
     ax.set_xlim(-2, max_val)
     ax.set_ylim(-2, max_val)
@@ -220,13 +220,13 @@ def plot_figure3_roc():
         ('Robust SNR (MAD)', df['r_snr'].values, '#ff7f0e', ':', 1.8),
         ('Pont SNR (2006)', df['p_snr'].values, '#9467bd', '--', 1.6),
         ('BLS SNR Proxy', df['b_snr'].values, '#e377c2', '-.', 1.6),
-        ('Log-SNRAS Composite', df['l_snras_corr'].values, '#17becf', '-', 1.8)
+        ('VESTA Composite Score', df['vesta_corr'].values, '#17becf', '-', 1.8)
     ]
 
     fig, ax = plt.subplots(figsize=(7, 6), dpi=300)
 
     for name, score, color, ls, lw in metrics:
-        from log_snras.stats import compute_auc
+        from vesta.stats import compute_auc
         auc_val = compute_auc(y_true, score)
         
         # Calculate FPR and TPR

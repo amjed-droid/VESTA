@@ -17,13 +17,13 @@ import lightkurve as lk
 # Add src and current directory to python path
 sys.path.insert(0, os.path.abspath('src'))
 sys.path.insert(0, os.path.abspath('.'))
-from log_snras import (
-    calculate_log_snras,
+from vesta import (
+    calculate_vesta,
     compute_baseline_metrics,
     get_calibrated_tier
 )
-from log_snras.masking import create_ephemeris_mask
-from log_snras.stats import (
+from vesta.masking import create_ephemeris_mask
+from vesta.stats import (
     compute_auc,
     stratified_bootstrap_ci,
     delong_test,
@@ -92,7 +92,7 @@ def download_and_extract_target(target_info, cache_dir='data/raw_lc'):
 def run_benchmark():
     """Runs the entire benchmark evaluation across all targets."""
     print("=" * 70)
-    print("LOG-SNRAS MULTI-HOST BENCHMARK EVALUATION")
+    print("VESTA MULTI-HOST BENCHMARK EVALUATION")
     print("=" * 70)
 
     rows = []
@@ -133,12 +133,12 @@ def run_benchmark():
         # Compute baselines
         baselines = compute_baseline_metrics(sub_flux, sub_mask, duration_hours=duration * 24.0)
 
-        # Compute Log-SNRAS without shape correction
-        res_raw = calculate_log_snras(sub_flux, sub_mask, time=sub_time, period=period, t0=t0, apply_shape_correction=False)
+        # Compute VESTA without shape correction
+        res_raw = calculate_vesta(sub_flux, sub_mask, time=sub_time, period=period, t0=t0, apply_shape_correction=False)
         tier_raw = get_calibrated_tier(res_raw['penalty'], n_in, n_out)
 
-        # Compute Log-SNRAS WITH shape correction
-        res_corr = calculate_log_snras(sub_flux, sub_mask, time=sub_time, period=period, t0=t0, apply_shape_correction=True)
+        # Compute VESTA WITH shape correction
+        res_corr = calculate_vesta(sub_flux, sub_mask, time=sub_time, period=period, t0=t0, apply_shape_correction=True)
         tier_corr = get_calibrated_tier(res_corr['penalty'], n_in, n_out)
 
         row = {
@@ -159,15 +159,15 @@ def run_benchmark():
             'psi_raw': res_raw['psi'],
             'penalty_raw': res_raw['penalty'],
             'tier_raw': tier_raw,
-            'l_snras_raw': res_raw['log_snras'],
+            'vesta_raw': res_raw['vesta_score'],
             'psi_corr': res_corr['psi'],
             'penalty_corr': res_corr['penalty'],
             'tier_corr': tier_corr,
-            'l_snras_corr': res_corr['log_snras'],
+            'vesta_corr': res_corr['vesta_score'],
             'literature_ref': item['literature_ref']
         }
         rows.append(row)
-        print(f"  Result: T-SNR={baselines['t_snr']:.2f}, L-SNRAS={res_corr['log_snras']:.2f}, "
+        print(f"  Result: T-SNR={baselines['t_snr']:.2f}, VESTA={res_corr['vesta_score']:.2f}, "
               f"Penalty={res_corr['penalty']:.4f}, Tier={tier_corr}")
 
     df_results = pd.DataFrame(rows)
@@ -190,7 +190,7 @@ def run_benchmark():
         'Robust SNR (MAD)': df_results['r_snr'].values,
         'Pont SNR (2006)': df_results['p_snr'].values,
         'BLS SNR Proxy': df_results['b_snr'].values,
-        'Log-SNRAS Composite': df_results['l_snras_corr'].values,
+        'VESTA Composite Score': df_results['vesta_corr'].values,
         'Inverse Depth (ppm)': -df_results['depth_measured_ppm'].values
     }
 

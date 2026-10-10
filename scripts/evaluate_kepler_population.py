@@ -17,9 +17,9 @@ warnings.filterwarnings('ignore')
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('src'))
-from src.log_snras.core import calculate_log_snras, get_calibrated_tier, compute_baseline_metrics
-from src.log_snras.masking import create_ephemeris_mask
-from src.log_snras.stats import compute_auc, stratified_bootstrap_ci, delong_test
+from src.vesta.core import calculate_vesta, get_calibrated_tier, compute_baseline_metrics
+from src.vesta.masking import create_ephemeris_mask
+from src.vesta.stats import compute_auc, stratified_bootstrap_ci, delong_test
 
 IN_CATALOG  = "data/kepler_population_catalog.csv"
 OUT_RESULTS = "data/kepler_population_results.csv"
@@ -37,9 +37,27 @@ def get_fits_files(fits_dir: str):
     return sorted(list(set(llc if llc else all_f)))
 
 
-def load_kepler_lightcurve_from_fits(fits_dir: str, max_files: int = 8):
-    """تحميل ودمج ملفات FITS للهدف بدقة وسرعة."""
-    files = get_fits_files(fits_dir)
+def load_kepler_lightcurve_from_fits(fits_dir: str, kepid: int = None, star_name: str = None, max_files: int = 8):
+    """تحميل ودمج ملفات FITS للهدف بدقة وسرعة، مع تنزيل تلقائي من MAST كاحتياط عند عدم توفر المجلد المحلي."""
+    files = get_fits_files(fits_dir) if fits_dir and os.path.exists(fits_dir) else []
+    
+    # إذا لم تتوفر ملفات محلية، يتم التنزيل التلقائي من MAST
+    if not files and (kepid or star_name):
+        try:
+            target_query = f"KIC {int(kepid)}" if (kepid is not None and not pd.isna(kepid) and int(kepid) > 0) else str(star_name)
+            search = lk.search_lightcurve(target_query, mission="Kepler", author="Kepler")
+            if len(search) > 0:
+                selected_search = search[:max_files]
+                lcc = selected_search.download_all()
+                if lcc is not None and len(lcc) > 0:
+                    stitched = lcc.stitch().normalize().remove_outliers(sigma=5)
+                    t = np.array(stitched.time.value, dtype=float)
+                    f = np.array(stitched.flux.value, dtype=float)
+                    mask = np.isfinite(t) & np.isfinite(f) & (f > 0)
+                    return t[mask], f[mask]
+        except Exception:
+            pass
+
     if not files:
         return None, None
 
@@ -71,11 +89,14 @@ def load_kepler_lightcurve_from_fits(fits_dir: str, max_files: int = 8):
 
 
 def load_artifact_lightcurve(cache_file: str):
-    """تحميل بيانات الشذوذ الفلكي من ملف npz."""
-    if not cache_file or not os.path.exists(cache_file):
+    """تحميل بيانات الشذوذ الفلكي من ملف npz مع توافق أنظمة التشغيل (Windows/Linux/macOS)."""
+    if not cache_file or pd.isna(cache_file):
+        return None, None
+    cache_path = os.path.normpath(str(cache_file).replace('\\', '/'))
+    if not os.path.exists(cache_path):
         return None, None
     try:
-        data = np.load(cache_file)
+        data = np.load(cache_path)
         t = data['time']
         f = data['flux']
         mask = np.isfinite(t) & np.isfinite(f) & (f > 0)
@@ -86,7 +107,7 @@ def load_artifact_lightcurve(cache_file: str):
 
 def main():
     print("=" * 75)
-    print("LOG-SNRAS POPULATION-SCALE BENCHMARK EVALUATION (KEPLER N=50 + ARTIFACTS)")
+    print("VESTA POPULATION-SCALE BENCHMARK EVALUATION (KEPLER N=56 + ARTIFACTS)")
     print("=" * 75)
 
     if not os.path.exists(IN_CATALOG):
@@ -118,7 +139,12 @@ def main():
 
         t0_sub = time.time()
         if ttype == 'confirmed_planet':
-            time_arr, flux_arr = load_kepler_lightcurve_from_fits(fits_dir, max_files=8)
+            time_arr, flux_arr = load_kepler_lightcurve_from_fits(
+                fits_dir,
+                kepid=row.get('kepid'),
+                star_name=row.get('star_name'),
+                max_files=8
+            )
         else:
             time_arr, flux_arr = load_artifact_lightcurve(cache_file)
 
@@ -142,9 +168,9 @@ def main():
             print(f"SKIP (n_in={n_in}) [{time.time()-t0_sub:.1f}s]")
             continue
 
-        # Compute Log-SNRAS
+        # Compute VESTA
         try:
-            res_dict = calculate_log_snras(
+            res_dict = calculate_vesta(
                 flux_arr, transit_mask,
                 time=time_arr,
                 period=period if period > 0 else None,
@@ -153,7 +179,7 @@ def main():
             )
             penalty = float(res_dict['penalty'])
             psi = float(res_dict['psi'])
-            log_snras = float(res_dict['log_snras'])
+            vesta_score = float(res_dict['vesta_score'])
             measured_depth = float(res_dict['depth'])
 
             tier_str = get_calibrated_tier(penalty, n_in=max(n_in, 5), n_out=max(n_out, 50))
@@ -168,7 +194,7 @@ def main():
             b_snr = float(baselines['b_snr'])
 
             elapsed = time.time() - t0_sub
-            print(f"OK | P={penalty:.4f} | {tier_str} | SNR_T={t_snr:.1f} | L_SNRAS={log_snras:.1f} [{elapsed:.1f}s]")
+            print(f"OK | P={penalty:.4f} | {tier_str} | SNR_T={t_snr:.1f} | VESTA={vesta_score:.1f} [{elapsed:.1f}s]")
 
             results.append({
                 'rank': rank,
@@ -187,7 +213,7 @@ def main():
                 'n_total_points': len(time_arr),
                 'penalty_corr': penalty,
                 'psi': psi,
-                'log_snras': log_snras,
+                'vesta_score': vesta_score,
                 'tier': tier_str,
                 'tier_num': tier_num,
                 't_snr': t_snr,
@@ -233,7 +259,7 @@ def main():
 
     metrics_to_eval = [
         ('Penalty (Shape-Corrected)', pen_score),
-        ('Log-SNRAS Composite',       res_df['log_snras'].values),
+        ('VESTA Composite Score',     res_df['vesta_score'].values),
         ('Traditional SNR',           res_df['t_snr'].values),
         ('Robust SNR (MAD)',          res_df['r_snr'].values),
         ('Pont SNR (2006)',           res_df['p_snr'].values),
@@ -255,8 +281,7 @@ def main():
             delta_auc = 0.0
         else:
             try:
-                dz, dp = delong_test(y_true, pen_score, scores)
-                delta_auc = pen_auc - auc_val
+                delta_auc, dz, dp = delong_test(y_true, pen_score, scores)
             except Exception:
                 dz, dp, delta_auc = np.nan, np.nan, np.nan
 

@@ -97,7 +97,7 @@ result = calculate_vesta(
 )
 
 print(f"Traditional SNR: {result['snr_trad']:.1f}")
-print(f"VESTA Score:     {result['log_snras']:.1f}")
+print(f"VESTA Score:     {result['vesta_score']:.1f}")
 print(f"Stability Pen:   {result['penalty']:.4f}")
 print(f"Dispersion Psi:  {result['psi']:.4f}")
 
@@ -113,9 +113,8 @@ print(f"Vetting Tier:    {tier}")
 ```
 VESTA/
 ├── src/
-│   ├── vesta/                      # Primary modern Python package
+│   ├── vesta/                      # Primary Python package
 │   │   ├── __init__.py             # Exports calculate_vesta, get_calibrated_tier
-│   ├── log_snras/                  # Backward-compatible package alias
 │   │   ├── core.py                 # Core mathematics, shape detrending, tiers
 │   │   ├── masking.py              # Uniform ephemeris phase-folding
 │   │   ├── stats.py                # DeLong tests and stratified bootstrap CIs

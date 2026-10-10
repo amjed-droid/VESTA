@@ -1,5 +1,5 @@
 """
-Unit Tests and Synthetic Benchmark Validation for Log-SNRAS
+Unit Tests and Synthetic Benchmark Validation for VESTA
 """
 
 import sys
@@ -7,8 +7,8 @@ import os
 sys.path.insert(0, os.path.abspath('src'))
 
 import numpy as np
-from log_snras import (
-    calculate_log_snras,
+from vesta import (
+    calculate_vesta,
     compute_shape_corrected_sigma_in,
     get_calibrated_tier,
     compute_baseline_metrics
@@ -23,7 +23,7 @@ def test_homoscedastic_limit():
     mask = np.zeros(n_points, dtype=bool)
     mask[2450:2550] = True  # N_in = 100
 
-    res = calculate_log_snras(flux, mask, apply_shape_correction=False)
+    res = calculate_vesta(flux, mask, apply_shape_correction=False)
     tier = get_calibrated_tier(res['penalty'], res['n_in'], res['n_out'])
     
     print(f"Homoscedastic test: Psi = {res['psi']:.4f}, Penalty = {res['penalty']:.4f}, Tier = {tier}")
@@ -49,11 +49,11 @@ def test_deep_transit_shape_correction():
     mask[transit_slice] = True
 
     # Without shape correction: geometric gradient inflates sigma_in
-    res_uncorrected = calculate_log_snras(flux, mask, apply_shape_correction=False)
+    res_uncorrected = calculate_vesta(flux, mask, apply_shape_correction=False)
     tier_uncorrected = get_calibrated_tier(res_uncorrected['penalty'], res_uncorrected['n_in'])
 
     # With shape correction: geometric gradient is removed
-    res_corrected = calculate_log_snras(flux, mask, apply_shape_correction=True)
+    res_corrected = calculate_vesta(flux, mask, apply_shape_correction=True)
     tier_corrected = get_calibrated_tier(res_corrected['penalty'], res_corrected['n_in'])
 
     print(f"Deep transit uncorrected: sigma_in = {res_uncorrected['sigma_in']:.6f}, Penalty = {res_uncorrected['penalty']:.4f}, Tier = {tier_uncorrected}")
@@ -72,7 +72,7 @@ def test_heteroscedastic_noise_burst():
     mask[2450:2550] = True
     flux[mask] += rng.normal(0, 0.005, size=100) # 5x variance burst
 
-    res = calculate_log_snras(flux, mask, apply_shape_correction=True)
+    res = calculate_vesta(flux, mask, apply_shape_correction=True)
     tier = get_calibrated_tier(res['penalty'], res['n_in'], res['n_out'])
     print(f"Heteroscedastic burst: Psi = {res['psi']:.4f}, Penalty = {res['penalty']:.4f}, Tier = {tier}")
     assert 'Tier 3' in tier, f"Expected Tier 3 (Veto), got {tier}"

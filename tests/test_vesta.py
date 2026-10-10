@@ -38,7 +38,7 @@ class TestVESTAFramework(unittest.TestCase):
         self.assertLess(res['penalty'], 0.15, f"Expected low penalty, got {res['penalty']}")
         self.assertIn('Tier 1', tier, f"Expected Tier 1 Clean, got {tier}")
         # Verify score preservation
-        score_ratio = res['log_snras'] / (res['snr_trad'] + 1e-12)
+        score_ratio = res['vesta_score'] / (res['snr_trad'] + 1e-12)
         self.assertGreater(score_ratio, 0.85, f"Expected high score preservation, got {score_ratio}")
 
     def test_deep_transit_shape_correction(self):
@@ -87,7 +87,7 @@ class TestVESTAFramework(unittest.TestCase):
         self.assertGreater(res['penalty'], 0.60, f"Expected heavy penalty, got {res['penalty']}")
         self.assertIn('Tier 3', tier, f"Expected Tier 3 Veto, got {tier}")
         # Score must be heavily attenuated
-        self.assertLess(res['log_snras'], res['snr_trad'] / 1.5)
+        self.assertLess(res['vesta_score'], res['snr_trad'] / 1.5)
 
     def test_depth_invariance_across_scales(self):
         """Verify consistent near-zero penalties across 3 decades of synthetic depths."""

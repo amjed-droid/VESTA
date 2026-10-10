@@ -1,6 +1,6 @@
 """
-Statistical Verification Suite for Log-SNRAS
-=============================================
+Statistical Verification Suite for VESTA
+========================================
 Implements:
 1. DeLong asymptotic test for correlated ROC curves (DeLong et al. 1988)
 2. Stratified Bootstrap Confidence Intervals

@@ -1,11 +1,9 @@
 """
-analyze_performance.py — Full statistical validation pipeline for Log-SNRAS.
-
-Replaces scripts/utils/analyze_performance.m
+analyze_performance.py — Full statistical validation pipeline for VESTA.
 
 Implements the complete benchmarking procedure underlying Table 1 and
-Section 3 of the manuscript "Log-SNRAS: A Computationally Efficient
-Variance-Stabilized Metric for Vetting Heteroscedastic Light Curves."
+Section 3 of the manuscript "Population-Scale Heteroscedastic Transit Vetting:
+A Depth-Invariant Variance-Stabilized Framework (VESTA)."
 
 Methodology
 -----------
@@ -57,7 +55,7 @@ def run_full_analysis(df: pd.DataFrame,
     ----------
     df   : DataFrame with columns:
                label, penalty_corr, penalty_raw, t_snr, r_snr, p_snr,
-               b_snr, l_snras_corr, depth_measured_ppm
+               b_snr, vesta_corr, depth_measured_ppm
     B    : number of bootstrap resamples (default 2000)
     n_perm : number of permutations for permutation test (default 10 000)
     seed : random seed for exact reproducibility (default 42)
@@ -79,6 +77,7 @@ def run_full_analysis(df: pd.DataFrame,
     # direction = +1 → higher score = more likely planet
     # direction = -1 → lower score  = more likely planet (penalty-type)
     # ------------------------------------------------------------------
+    vesta_col = 'vesta_corr' if 'vesta_corr' in df.columns else 'vesta_score'
     metrics = [
         ('Penalty (Shape-Corrected)', -df['penalty_corr'].values),
         ('Penalty (Uncorrected)',     -df['penalty_raw'].values),
@@ -86,7 +85,7 @@ def run_full_analysis(df: pd.DataFrame,
         ('Robust SNR (MAD)',          df['r_snr'].values),
         ('Pont SNR (2006)',           df['p_snr'].values),
         ('BLS SNR Proxy',             df['b_snr'].values),
-        ('Log-SNRAS Composite',       df['l_snras_corr'].values),
+        ('VESTA Composite Score',     df[vesta_col].values),
         ('Inverse Depth (ppm)',       -df['depth_measured_ppm'].values),
     ]
 
@@ -215,7 +214,7 @@ def _plot_roc(y, metrics, point_aucs, outpath):
         0: ('#003399', 2.5),   # Shape-Corrected Penalty — dark blue, thick
         1: ('#888888', 1.4),   # Uncorrected Penalty
         2: ('#CC3300', 1.4),   # Traditional SNR
-        6: ('#009933', 1.8),   # Log-SNRAS Composite — green
+        6: ('#009933', 1.8),   # VESTA Composite Score — green
         7: ('#FF8800', 1.4),   # Inverse Depth
     }
 

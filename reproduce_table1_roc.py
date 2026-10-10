@@ -1,13 +1,11 @@
 """
 reproduce_table1_roc.py — Reproduces Table 1 & Figure 3 (ROC) from the manuscript.
 
-Replaces: reproduce_table3_roc.m
-
-Log-SNRAS: A Computationally Efficient Variance-Stabilized Metric
-for Vetting Heteroscedastic Light Curves
+VESTA: A Depth-Invariant Variance-Stabilized Framework
+for Population-Scale Exoplanet Transit Vetting
 
 This script loads the curated multi-host benchmark evaluation results,
-computes the AUC for all 8 metrics (including shape-corrected Log-SNRAS),
+computes the AUC for all 8 metrics (including shape-corrected VESTA),
 computes stratified bootstrap 95% confidence intervals (B=2000, seed=42),
 performs exact DeLong tests, and generates the publication ROC curve.
 
@@ -77,6 +75,7 @@ def reproduce_table1_roc(
     # ------------------------------------------------------------------
     # 2. Define metrics
     # ------------------------------------------------------------------
+    vesta_col = 'vesta_corr' if 'vesta_corr' in df.columns else 'vesta_score'
     metrics = [
         ('Penalty (Shape-Corrected)', -df['penalty_corr'].values),
         ('Penalty (Uncorrected)',     -df['penalty_raw'].values),
@@ -84,7 +83,7 @@ def reproduce_table1_roc(
         ('Robust SNR (MAD)',          df['r_snr'].values),
         ('Pont SNR (2006)',           df['p_snr'].values),
         ('BLS SNR Proxy',             df['b_snr'].values),
-        ('Log-SNRAS Composite',       df['l_snras_corr'].values),
+        ('VESTA Composite Score',     df[vesta_col].values),
         ('Inverse Depth (ppm)',      -df['depth_measured_ppm'].values),
     ]
 
@@ -170,7 +169,7 @@ def _plot_roc(y, metrics, point_aucs, outpath):
         0: ('#003399', 2.5, '-',  'Penalty (Shape-Corrected)'),
         1: ('#999999', 1.4, '--', 'Penalty (Uncorrected)'),
         2: ('#CC3300', 1.4, '-',  'Traditional SNR'),
-        6: ('#009933', 1.8, '-',  'Log-SNRAS Composite'),
+        6: ('#009933', 1.8, '-',  'VESTA Composite Score'),
         7: ('#FF8800', 1.4, '--', 'Inverse Depth'),
     }
 

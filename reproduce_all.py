@@ -100,7 +100,7 @@ def main():
         print(f" {icon} {label}: {path}")
 
     print("\n [OK] Publication figures in figures/:")
-    fig_dir = 'figures' if os.path.isdir('figures') else 'Log-SNRAS_repo/figures'
+    fig_dir = 'figures'
     for fig_file in sorted(os.listdir(fig_dir)):
         if fig_file.endswith('.png') and fig_file.startswith('Figure'):
             kb = os.path.getsize(os.path.join(fig_dir, fig_file)) // 1024

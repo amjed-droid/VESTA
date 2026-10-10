@@ -34,7 +34,7 @@ with open("data/latex_catalog_table.tex", "w", encoding="utf-8") as f:
         period = f"{r['period']:.3f}"
         dur = f"{r['duration_hours']:.1f}"
         tsnr = f"{r['t_snr']:.1f}"
-        vscore = f"{r['log_snras']:.1f}"
+        vscore = f"{r['vesta_score']:.1f}"
         pen = f"{r['penalty_corr']:.4f}"
         tier = r['tier'].replace(" (Clean)", "").replace(" (Review)", "").replace(" (Veto)", "")
         tclass = "Planet" if r['label'] == 1 else "Artifact"

@@ -20,7 +20,7 @@ all_ok = True
 expected_aucs = {
     'Penalty (Shape-Corrected)': (0.757, 0.486, 0.971),
     'Penalty (Uncorrected)':     (0.600, 0.286, 0.871),
-    'Log-SNRAS Composite':       (0.700, 0.414, 0.943),
+    'VESTA Composite Score':     (0.700, 0.414, 0.943),
     'Traditional SNR':           (0.629, 0.321, 0.914),
     'Robust SNR (MAD)':          (0.614, 0.314, 0.886),
     'BLS SNR Proxy':             (0.614, 0.314, 0.886),
@@ -164,12 +164,12 @@ print()
 # -----------------------------------------------------------------------
 print('FIGURE FILES (Figures 1-6 in manuscript):')
 expected_figs = [
-    ('Figure1_ResponseSurface.png',      200),
-    ('Figure2_EmpiricalDiagnostic.png',  200),
-    ('Figure3_ROC_MultiHost.png',        200),
-    ('Figure4_PiMen_Real_PhaseFold.png', 300),
-    ('Figure5_TOI201_ShapeDiagnostic.png', 300),
-    ('Figure6_Comparison_RealData.png',  300),
+    ('Figure1_ResponseSurface.png',          200),
+    ('Figure2_DepthInvariance.png',          200),
+    ('Figure3_Archetypes_PhaseFold.png',     300),
+    ('Figure4_Population_ROC.png',           200),
+    ('Figure5_Tier_Distribution.png',        200),
+    ('Figure6_CaseStudies_Diagnostics.png',  300),
 ]
 for figname, min_kb in expected_figs:
     path = os.path.join('figures', figname)

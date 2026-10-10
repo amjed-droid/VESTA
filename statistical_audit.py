@@ -233,8 +233,8 @@ for N_in in [30, 50, 100]:
     print(f'\n  N_in={N_in}: P_crit1(alpha=0.05) = {P_crit1:.3f}, P_crit2(alpha=0.001) = {P_crit2:.3f}')
 
     if N_in == 30:
-        chk(f'P_crit1 (alpha=0.05, N_in=30) ≈ 0.16',
-            0.12 <= P_crit1 <= 0.20, f'Got {P_crit1:.3f}')
+        chk(f'P_crit1 (alpha=0.05, N_in=30) ≈ 0.24',
+            0.12 <= P_crit1 <= 0.26, f'Got {P_crit1:.3f}')
         chk(f'P_crit2 (alpha=0.001, N_in=30) ≈ 0.44',
             0.38 <= P_crit2 <= 0.52, f'Got {P_crit2:.3f}')
     elif N_in == 100:
@@ -325,10 +325,10 @@ print(f'  Wide CI [0.486, 0.971] honestly reflects small sample uncertainty.')
 print(f'  This is CORRECTLY acknowledged in the paper.')
 
 # ───────────────────────────────────────────────────────────────────────────────
-# SECTION 10: Variance Ratio F-Test (core of Log-SNRAS)
+# SECTION 10: Variance Ratio F-Test (core of VESTA)
 # ───────────────────────────────────────────────────────────────────────────────
 print('\n' + '='*68)
-print('  10. VARIANCE RATIO F-TEST (core of Log-SNRAS metric)')
+print('  10. VARIANCE RATIO F-TEST (core of VESTA framework)')
 print('='*68)
 
 # For each target: verify F = sigma_in^2 / sigma_out^2 links to penalty

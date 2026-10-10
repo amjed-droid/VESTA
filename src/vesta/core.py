@@ -1,7 +1,7 @@
 """
-Log-SNRAS Core Algorithm and Metric Suite
-=========================================
-Implements the variance-stabilized Log-SNRAS metric with deterministic
+VESTA Core Algorithm and Metric Suite
+=====================================
+Implements the variance-stabilized VESTA framework with deterministic
 transit shape correction and calibrated F-distribution thresholds,
 alongside established transit vetting benchmarks.
 
@@ -84,9 +84,9 @@ def compute_transit_shape_residuals(f_in, time_in=None, period=None, t0=None, me
 compute_shape_corrected_sigma_in = compute_transit_shape_residuals
 
 
-def calculate_log_snras(f_norm, transit_mask, time=None, period=None, t0=None, snr_trad=None, apply_shape_correction=True):
+def calculate_vesta(f_norm, transit_mask, time=None, period=None, t0=None, snr_trad=None, apply_shape_correction=True):
     """
-    Calculates the Log-SNRAS metric and dispersion contrast.
+    Calculates the VESTA metric and dispersion contrast.
 
     Parameters
     ----------
@@ -108,7 +108,7 @@ def calculate_log_snras(f_norm, transit_mask, time=None, period=None, t0=None, s
     Returns
     -------
     dict:
-        log_snras : float
+        vesta_score : float
         penalty : float, ln(1 + psi)
         psi : float, dispersion contrast
         d_factor : float, 1 + penalty
@@ -117,6 +117,7 @@ def calculate_log_snras(f_norm, transit_mask, time=None, period=None, t0=None, s
         depth : float
         n_in : int
         n_out : int
+        snr_trad : float
     """
     f_in = f_norm[transit_mask]
     f_out = f_norm[~transit_mask]
@@ -126,9 +127,9 @@ def calculate_log_snras(f_norm, transit_mask, time=None, period=None, t0=None, s
 
     if n_in == 0 or n_out == 0:
         return {
-            'log_snras': np.nan, 'penalty': np.nan, 'psi': np.nan,
+            'vesta_score': np.nan, 'penalty': np.nan, 'psi': np.nan,
             'd_factor': np.nan, 'sigma_in': np.nan, 'sigma_out': np.nan,
-            'depth': np.nan, 'n_in': n_in, 'n_out': n_out
+            'depth': np.nan, 'n_in': n_in, 'n_out': n_out, 'snr_trad': np.nan
         }
 
     depth = max(float(np.mean(f_out) - np.mean(f_in)), 0.0)
@@ -154,10 +155,10 @@ def calculate_log_snras(f_norm, transit_mask, time=None, period=None, t0=None, s
     if snr_trad is None:
         snr_trad = (depth / (sigma_out + 1e-12)) * np.sqrt(n_in)
 
-    log_snras = snr_trad / d_factor
+    vesta_score = snr_trad / d_factor
 
     return {
-        'log_snras': float(log_snras),
+        'vesta_score': float(vesta_score),
         'penalty': float(penalty),
         'psi': float(psi),
         'd_factor': float(d_factor),

@@ -1,10 +1,10 @@
 """
-evaluate_toi_catalog.py — تشغيل Log-SNRAS على كتالوج TESS TOI الكامل
+evaluate_toi_catalog.py — تشغيل VESTA على كتالوج TESS TOI الكامل
 ======================================================================
 يقرأ: data/toi_catalog_labeled.csv
 يُنزّل ويُخزن منحنيات الضوء مع حد أقصى للمهلة (Timeout 30s)
 يصحح الـ epoch من BJD إلى BTJD (BJD - 2457000)
-يحسب: Log-SNRAS, penalty_corr, Tiers, T-SNR, R-SNR, P-SNR, B-SNR
+يحسب: VESTA, penalty_corr, Tiers, T-SNR, R-SNR, P-SNR, B-SNR
 يكتب: data/toi_evaluation_results.csv
 """
 
@@ -19,8 +19,8 @@ warnings.filterwarnings('ignore')
 # Add project root and src to path
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('src'))
-from src.log_snras.core import calculate_log_snras, get_calibrated_tier, compute_baseline_metrics
-from src.log_snras.masking import create_ephemeris_mask
+from src.vesta.core import calculate_vesta, get_calibrated_tier, compute_baseline_metrics
+from src.vesta.masking import create_ephemeris_mask
 
 IN_CSV    = "data/toi_catalog_labeled.csv"
 OUT_CSV   = "data/toi_evaluation_results.csv"
@@ -100,7 +100,7 @@ def evaluate_one(row: pd.Series) -> dict:
         'penalty_corr':    np.nan,
         'tier':            'None',
         'tier_num':        -1,
-        'log_snras':       np.nan,
+        'vesta_score':     np.nan,
         'psi':             np.nan,
         't_snr':           np.nan,
         'r_snr':           np.nan,
@@ -162,9 +162,9 @@ def evaluate_one(row: pd.Series) -> dict:
         result['status'] = 'insufficient_pts'
         return result
 
-    # Compute Log-SNRAS
+    # Compute VESTA
     try:
-        res_dict = calculate_log_snras(
+        res_dict = calculate_vesta(
             f_norm, transit_mask,
             time=time_arr,
             period=period if period > 0 else None,
@@ -178,7 +178,7 @@ def evaluate_one(row: pd.Series) -> dict:
         result['penalty_corr'] = float(penalty)
         result['tier']         = str(tier_str)
         result['tier_num']     = int(tier_num)
-        result['log_snras']    = float(res_dict['log_snras'])
+        result['vesta_score']  = float(res_dict['vesta_score'])
         result['psi']          = float(res_dict['psi'])
 
         # Compute comparator baselines
@@ -281,8 +281,8 @@ def main():
         if n_cp >= 2 and n_fp >= 2:
             from sklearn.metrics import roc_auc_score
             for col, name in [
-                ('penalty_corr', 'Log-SNRAS Penalty (Inv)'),
-                ('log_snras',    'Log-SNRAS Metric'),
+                ('penalty_corr', 'VESTA Penalty (Inv)'),
+                ('vesta_score',  'VESTA Metric'),
                 ('t_snr',        'Traditional SNR'),
                 ('r_snr',        'Robust SNR (MAD)'),
                 ('p_snr',        'Pont SNR'),

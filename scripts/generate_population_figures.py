@@ -46,9 +46,9 @@ def plot_fig1_response_surface():
     P = np.log(1.0 + psi)
     
     snr_trad = 50.0
-    L_SNRAS = snr_trad / (1.0 + P)
+    L_VESTA = snr_trad / (1.0 + P)
 
-    cf = ax.contourf(SI * 1e3, SO * 1e3, L_SNRAS, levels=25, cmap='viridis')
+    cf = ax.contourf(SI * 1e3, SO * 1e3, L_VESTA, levels=25, cmap='viridis')
     cbar = fig.colorbar(cf, ax=ax)
     cbar.set_label(r'VESTA Score ($\mathrm{SNR}_{\rm raw} = 50$)', rotation=270, labelpad=15)
 
@@ -173,8 +173,8 @@ def plot_fig3_phase_folded_archetypes():
     """Fig 3: Phase-Folded Light Curve Archetypes across 4 Decades."""
     print("Generating Figure 3: Archetype Phase-Folded Transits...")
     from scripts.evaluate_kepler_population import load_kepler_lightcurve_from_fits
-    from src.log_snras.masking import create_ephemeris_mask
-    from src.log_snras.core import compute_transit_shape_residuals
+    from src.vesta.masking import create_ephemeris_mask
+    from src.vesta.core import compute_transit_shape_residuals
 
     df = pd.read_csv("data/kepler_population_catalog.csv")
     archetypes = [
@@ -253,7 +253,7 @@ def plot_fig4_population_roc():
     # Metrics
     configs = [
         ('Penalty (Shape-Corrected)', -df['penalty_corr'].values, 'crimson', '-', 2.5),
-        ('VESTA Composite Score',     df['log_snras'].values,     'purple',  '-.', 1.8),
+        ('VESTA Composite Score',     df['vesta_score'].values,   'purple',  '-.', 1.8),
         ('Traditional SNR',           df['t_snr'].values,         'navy',    '--', 1.8),
         ('Robust SNR (MAD)',          df['r_snr'].values,         'teal',    ':', 1.8),
         ('Pont SNR (2006)',           df['p_snr'].values,         'darkorange', '--', 1.5),

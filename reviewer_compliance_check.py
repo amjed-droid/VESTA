@@ -42,11 +42,11 @@ print('━━━━━━━━━━━━━━━━━━━━━━━━�
 
 # ---- C1: Synthetic data ----
 print('Comment 1: Synthetic data in baseline validation figure')
-fig4 = os.path.join('figures', 'Figure4_PiMen_Real_PhaseFold.png')
-fig6 = os.path.join('figures', 'Figure6_Comparison_RealData.png')
-check('Figure4 (Pi Mensae) from real TESS SPOC FITS',
-      os.path.exists(fig4) and os.path.getsize(fig4) > 100000,
-      f'{os.path.getsize(fig4)//1024} KB' if os.path.exists(fig4) else 'MISSING')
+fig3 = os.path.join('figures', 'Figure3_Archetypes_PhaseFold.png')
+fig6 = os.path.join('figures', 'Figure6_CaseStudies_Diagnostics.png')
+check('Figure3 (Pi Mensae) from real TESS SPOC FITS',
+      os.path.exists(fig3) and os.path.getsize(fig3) > 100000,
+      f'{os.path.getsize(fig3)//1024} KB' if os.path.exists(fig3) else 'MISSING')
 check('Figure6 (Boyajian D792) from real Kepler Q8 FITS',
       os.path.exists(fig6) and os.path.getsize(fig6) > 100000,
       f'{os.path.getsize(fig6)//1024} KB' if os.path.exists(fig6) else 'MISSING')
@@ -60,7 +60,7 @@ print()
 
 # ---- C2: Masking discrepancy ----
 print('Comment 2: Masking discrepancy (ephemeris vs sigma-clipping)')
-masking_py = 'src/log_snras/masking.py'
+masking_py = 'src/vesta/masking.py'
 check('masking.py module exists', os.path.exists(masking_py))
 if os.path.exists(masking_py):
     with open(masking_py) as f:
@@ -75,7 +75,7 @@ print()
 
 # ---- C3: Column indexing bug ----
 print('Comment 3: Hardcoded column index 8 in FITS ingestion')
-io_py = 'src/log_snras/io.py'
+io_py = 'src/vesta/io.py'
 check('io.py module exists', os.path.exists(io_py))
 if os.path.exists(io_py):
     with open(io_py) as f:
@@ -202,10 +202,10 @@ check('Calibrated P_crit,2 ≈ 0.44 for N_in=30',
       '0.44' in main_content)
 
 # Check F-calibration in core.py
-core_py = 'src/log_snras/core.py'
+core_py = 'src/vesta/core.py'
 with open(core_py) as f:
     core_c = f.read()
-check('F-distribution calibration in src/log_snras/core.py',
+check('F-distribution calibration in src/vesta/core.py',
       'f.ppf' in core_c.lower() or 'scipy.stats' in core_c.lower() or 'stats.f' in core_c)
 print()
 
