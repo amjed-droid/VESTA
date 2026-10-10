@@ -171,37 +171,21 @@ def calculate_vesta(f_norm, transit_mask, time=None, period=None, t0=None, snr_t
     }
 
 
-def get_calibrated_tier(penalty, n_in, n_out=1000, alpha_t1=0.05, alpha_t2=0.001):
+def get_calibrated_tier(penalty, n_in=100, n_out=1000, alpha_t1=0.05, alpha_t2=0.001):
     """
-    Assigns classification tier based on calibrated F-distribution percentiles.
-    
-    Under H0 (homoscedastic Gaussian noise), (s_in/s_out)^2 ~ F(n_in-1, n_out-1).
-    psi = |s_in/s_out - 1|. We determine critical psi values from the two-tailed F-quantiles.
+    Assigns operational classification tier based on calibrated thresholds
+    formalized in Section 2.5 of the manuscript:
+    - Tier 1 (Clean Candidate): P <= 0.15
+    - Tier 2 (Review Required): 0.15 < P <= 0.60
+    - Tier 3 (Automated Veto):   P > 0.60
     """
-    if n_in < 4:
-        return 'Excluded (N_in < 4)'
-
-    df1 = n_in - 1
-    df2 = max(n_out - 1, 100)
-
-    # Upper and lower quantiles for alpha_t1 (Tier 1 threshold)
-    f_hi_t1 = stats.f.ppf(1 - alpha_t1 / 2, df1, df2)
-    f_lo_t1 = stats.f.ppf(alpha_t1 / 2, df1, df2)
-    psi_crit_t1 = max(abs(np.sqrt(f_hi_t1) - 1.0), abs(np.sqrt(f_lo_t1) - 1.0))
-    p_crit_t1 = np.log(1.0 + psi_crit_t1)
-
-    # Upper and lower quantiles for alpha_t2 (Tier 2/3 veto threshold)
-    f_hi_t2 = stats.f.ppf(1 - alpha_t2 / 2, df1, df2)
-    f_lo_t2 = stats.f.ppf(alpha_t2 / 2, df1, df2)
-    psi_crit_t2 = max(abs(np.sqrt(f_hi_t2) - 1.0), abs(np.sqrt(f_lo_t2) - 1.0))
-    p_crit_t2 = np.log(1.0 + psi_crit_t2)
-
-    if penalty <= p_crit_t1:
+    if penalty <= 0.15:
         return 'Tier 1 (Clean)'
-    elif penalty <= p_crit_t2:
+    elif penalty <= 0.60:
         return 'Tier 2 (Review)'
     else:
         return 'Tier 3 (Veto)'
+
 
 
 def compute_baseline_metrics(f_norm, transit_mask, duration_hours=2.5, cadence_minutes=2.0):
