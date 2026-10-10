@@ -16,10 +16,11 @@ from scipy import stats
 from scipy.signal import savgol_filter
 
 
-def compute_transit_shape_residuals(f_in, time_in=None, period=None, t0=None, method='poly'):
+def compute_transit_shape_residuals(f_in, time_in=None, period=None, t0=None, method='adaptive_spline'):
     """
     Subtracts deterministic transit profile from in-transit points to isolate
-    genuine photometric noise scatter (sigma_in,res).
+    genuine photometric noise scatter (sigma_in,res) via adaptive binning
+    or non-parametric splines.
 
     Parameters
     ----------
@@ -32,6 +33,7 @@ def compute_transit_shape_residuals(f_in, time_in=None, period=None, t0=None, me
     t0 : float, optional
         Transit epoch in days.
     method : str
+        'adaptive_spline' (dynamic M bins with linear spline, Algorithm 2),
         'poly' (2nd-4th order polynomial), 'savgol' (Savitzky-Golay), or 'median'.
 
     Returns
@@ -63,7 +65,28 @@ def compute_transit_shape_residuals(f_in, time_in=None, period=None, t0=None, me
     x_sorted = x[sort_idx]
     f_sorted = f_in[sort_idx]
 
-    if method == 'poly':
+    if method == 'adaptive_spline':
+        # Dynamic adaptive bin count M = clip(floor(sqrt(N_in)), 5, 100)
+        M = int(np.clip(np.floor(np.sqrt(n_in)), 5, 100))
+        bin_edges = np.linspace(x_sorted[0], x_sorted[-1], M + 1)
+        bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+        bin_medians = np.zeros(M)
+        for m in range(M):
+            if m == M - 1:
+                in_bin = (x_sorted >= bin_edges[m]) & (x_sorted <= bin_edges[m + 1])
+            else:
+                in_bin = (x_sorted >= bin_edges[m]) & (x_sorted < bin_edges[m + 1])
+            if np.any(in_bin):
+                bin_medians[m] = np.median(f_sorted[in_bin])
+            else:
+                bin_medians[m] = np.median(f_sorted)
+
+        f_model_sorted = np.interp(x_sorted, bin_centers, bin_medians)
+        inv_sort = np.empty_like(sort_idx)
+        inv_sort[sort_idx] = np.arange(len(sort_idx))
+        f_model = f_model_sorted[inv_sort]
+
+    elif method == 'poly':
         deg = 4 if n_in >= 15 else (2 if n_in >= 6 else 1)
         try:
             coeffs = np.polyfit(x_sorted, f_sorted, deg=deg)
@@ -84,9 +107,12 @@ def compute_transit_shape_residuals(f_in, time_in=None, period=None, t0=None, me
 compute_shape_corrected_sigma_in = compute_transit_shape_residuals
 
 
-def calculate_vesta(f_norm, transit_mask, time=None, period=None, t0=None, snr_trad=None, apply_shape_correction=True):
+def calculate_vesta(f_norm, transit_mask, time=None, period=None, t0=None, snr_trad=None,
+                    apply_shape_correction=True, companion_masks=None,
+                    shape_method='adaptive_spline', apply_shrinkage=False, m0=10):
     """
-    Calculates the VESTA metric and dispersion contrast.
+    Calculates the VESTA metric with Poisson noise correction, adaptive detrending,
+    and optional cross-ephemeris companion masking.
 
     Parameters
     ----------
@@ -104,23 +130,42 @@ def calculate_vesta(f_norm, transit_mask, time=None, period=None, t0=None, snr_t
         Traditional SNR. If None, it will be computed from flux and mask.
     apply_shape_correction : bool
         Whether to subtract transit shape before computing sigma_in.
+    companion_masks : list of np.ndarray, optional
+        List of boolean masks for companion planets to excise from out-of-transit baseline.
+    shape_method : str
+        Method for transit shape subtraction ('adaptive_spline', 'poly', 'savgol').
+    apply_shrinkage : bool
+        Whether to apply Bayesian shrinkage for small sample sizes (N_in < 30).
+    m0 : float
+        Prior degrees of freedom for Bayesian shrinkage (default 10).
 
     Returns
     -------
     dict:
         vesta_score : float
         penalty : float, ln(1 + psi)
-        psi : float, dispersion contrast
+        psi : float, Poisson-corrected dispersion contrast
+        psi_one_sided : float, one-sided excess dispersion contrast
         d_factor : float, 1 + penalty
         sigma_in : float
         sigma_out : float
+        sigma_expected : float
         depth : float
         n_in : int
         n_out : int
         snr_trad : float
     """
+    # Cross-ephemeris companion masking to prevent baseline contamination
+    if companion_masks is not None and len(companion_masks) > 0:
+        comp_mask = np.zeros(len(f_norm), dtype=bool)
+        for c in companion_masks:
+            comp_mask |= np.asarray(c, dtype=bool)
+        out_mask = (~transit_mask) & (~comp_mask)
+    else:
+        out_mask = ~transit_mask
+
     f_in = f_norm[transit_mask]
-    f_out = f_norm[~transit_mask]
+    f_out = f_norm[out_mask]
 
     n_in = len(f_in)
     n_out = len(f_out)
@@ -128,7 +173,8 @@ def calculate_vesta(f_norm, transit_mask, time=None, period=None, t0=None, snr_t
     if n_in == 0 or n_out == 0:
         return {
             'vesta_score': np.nan, 'penalty': np.nan, 'psi': np.nan,
-            'd_factor': np.nan, 'sigma_in': np.nan, 'sigma_out': np.nan,
+            'psi_one_sided': np.nan, 'd_factor': np.nan,
+            'sigma_in': np.nan, 'sigma_out': np.nan, 'sigma_expected': np.nan,
             'depth': np.nan, 'n_in': n_in, 'n_out': n_out, 'snr_trad': np.nan
         }
 
@@ -138,16 +184,25 @@ def calculate_vesta(f_norm, transit_mask, time=None, period=None, t0=None, snr_t
     if apply_shape_correction and n_in >= 6:
         time_in = time[transit_mask] if time is not None else None
         sigma_in, _ = compute_transit_shape_residuals(
-            f_in, time_in=time_in, period=period, t0=t0
+            f_in, time_in=time_in, period=period, t0=t0, method=shape_method
         )
     else:
         sigma_in = float(np.std(f_in, ddof=1))
 
-    # Dispersion contrast centered at zero
-    if sigma_out <= 0 or np.isnan(sigma_out):
+    # Poisson photon-counting expected dispersion (sigma_expected = sigma_out * sqrt(1 - delta))
+    sigma_expected = sigma_out * np.sqrt(max(1.0 - depth, 1e-6))
+
+    # Optional analytical Bayesian shrinkage for sparse single-transit data (N_in < 30)
+    if apply_shrinkage and n_in < 30:
+        sigma_in = np.sqrt(((n_in - 1) * (sigma_in**2) + m0 * (sigma_expected**2)) / (n_in - 1 + m0))
+
+    # Poisson-corrected dispersion contrast
+    if sigma_expected <= 0 or np.isnan(sigma_expected):
         psi = 0.0
+        psi_one_sided = 0.0
     else:
-        psi = abs(sigma_in - sigma_out) / sigma_out
+        psi = abs(sigma_in - sigma_expected) / sigma_expected
+        psi_one_sided = max(0.0, sigma_in - sigma_expected) / sigma_expected
 
     penalty = float(np.log(1.0 + psi))
     d_factor = 1.0 + penalty
@@ -161,9 +216,11 @@ def calculate_vesta(f_norm, transit_mask, time=None, period=None, t0=None, snr_t
         'vesta_score': float(vesta_score),
         'penalty': float(penalty),
         'psi': float(psi),
+        'psi_one_sided': float(psi_one_sided),
         'd_factor': float(d_factor),
         'sigma_in': float(sigma_in),
         'sigma_out': float(sigma_out),
+        'sigma_expected': float(sigma_expected),
         'depth': float(depth),
         'n_in': n_in,
         'n_out': n_out,

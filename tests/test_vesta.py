@@ -111,6 +111,69 @@ class TestVESTAFramework(unittest.TestCase):
         for p, d in zip(penalties, depths):
             self.assertLess(p, 0.15, f"Depth {d*1e6:.0f} ppm produced excessive penalty {p:.4f}")
 
+    def test_poisson_noise_correction(self):
+        """Under Poisson photon noise, deep transits naturally exhibit reduced in-transit variance."""
+        rng = np.random.default_rng(42)
+        n_points = 10000
+        baseline_sigma = 0.005
+        depth = 0.05  # 5% depth (deep giant)
+        
+        flux = 1.0 + rng.normal(0, baseline_sigma, size=n_points)
+        transit_slice = slice(4500, 5500)  # N_in = 1000
+        # In-transit photon noise scales as sqrt(1 - depth)
+        poisson_in_sigma = baseline_sigma * np.sqrt(1.0 - depth)
+        flux[transit_slice] = (1.0 - depth) + rng.normal(0, poisson_in_sigma, size=1000)
+
+        mask = np.zeros(n_points, dtype=bool)
+        mask[transit_slice] = True
+
+        res = calculate_vesta(flux, mask, apply_shape_correction=True)
+        # Expected dispersion accounts for Poisson drop, contrast should be near zero
+        self.assertAlmostEqual(res['sigma_expected'], poisson_in_sigma, delta=0.0003)
+        self.assertLess(res['psi'], 0.05)
+        self.assertLess(res['penalty'], 0.05)
+
+    def test_cross_ephemeris_companion_masking(self):
+        """Companion planet transits inside target baseline must be excised to prevent inflation."""
+        rng = np.random.default_rng(42)
+        n_points = 10000
+        noise_sigma = 0.001
+        flux = 1.0 + rng.normal(0, noise_sigma, size=n_points)
+
+        # Target Planet A transit
+        mask_a = np.zeros(n_points, dtype=bool)
+        mask_a[2000:2200] = True
+        flux[2000:2200] -= 0.003  # 3,000 ppm
+
+        # Companion Planet B transit in Planet A's baseline
+        mask_b = np.zeros(n_points, dtype=bool)
+        mask_b[3500:3700] = True
+        flux[3500:3700] -= 0.015  # 15,000 ppm companion transit
+
+        # Without companion masking, sigma_out is inflated by Companion B
+        res_unmasked = calculate_vesta(flux, mask_a, apply_shape_correction=True)
+        # With companion masking, Companion B is cleanly excised
+        res_masked = calculate_vesta(flux, mask_a, apply_shape_correction=True, companion_masks=[mask_b])
+
+        self.assertGreater(res_unmasked['sigma_out'], res_masked['sigma_out'])
+        self.assertAlmostEqual(res_masked['sigma_out'], noise_sigma, delta=0.0001)
+
+    def test_bayesian_shrinkage_small_sample(self):
+        """Sparse single-transit data (N_in < 30) should anchor variance via conjugate prior."""
+        rng = np.random.default_rng(42)
+        n_points = 2000
+        noise_sigma = 0.001
+        flux = 1.0 + rng.normal(0, noise_sigma, size=n_points)
+
+        # Sparse single transit with only 12 points
+        mask = np.zeros(n_points, dtype=bool)
+        mask[1000:1012] = True
+        flux[1000:1012] -= 0.002
+
+        res_shrunk = calculate_vesta(flux, mask, apply_shape_correction=True, apply_shrinkage=True, m0=10)
+        self.assertLess(res_shrunk['penalty'], 0.15)
+        self.assertIn('Tier 1', get_calibrated_tier(res_shrunk['penalty']))
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
