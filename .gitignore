@@ -5,3 +5,16 @@ __pycache__/
 *.asv
 .DS_Store
 Thumbs.db
+
+# Ignore all document and manuscript files (Code & Software repository only)
+*.tex
+*.pdf
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lot
+*.lof
+*.doc
+*.docx
