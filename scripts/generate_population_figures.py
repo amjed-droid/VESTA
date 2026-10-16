@@ -179,7 +179,7 @@ def plot_fig3_phase_folded_archetypes():
     df = pd.read_csv("data/kepler_population_catalog.csv")
     archetypes = [
         ('Kepler-45 b',  'Ultra-Deep (32,040 ppm)'),
-        ('Kepler-148 d', 'Moderate (10,310 ppm)'),
+        ('Kepler-43 b',  'Moderate (8,000 ppm)'),
         ('Kepler-10 b',  'Shallow Super-Earth (190 ppm)'),
         ('Kepler-37 b',  'Ultra-Shallow Sub-Earth (12 ppm)')
     ]
@@ -461,7 +461,7 @@ def plot_fig6_case_studies_diagnostics():
     ax2.set_ylim(-850, 450)
     ax2.set_xlabel('Time from Nominal Mid-Transit (Hours)')
     ax2.set_ylabel(r'Relative Flux $\Delta F / F_0$ (ppm)')
-    ax2.set_title(r'(b) Kepler-36 c: Rigid Linear Ephemeris' + '\n' + r'Tier 3 Veto: $\pm 8$ h TTV Smearing Inflates Residuals')
+    ax2.set_title(r'(b) Kepler-36 c: Rigid Linear Ephemeris' + '\n' + r'Tier 2 Review: $\pm 8$ h TTV Smearing Inflates Residuals')
     ax2.grid(True, linestyle=':', alpha=0.5)
 
     badge36_lin = (
@@ -469,10 +469,10 @@ def plot_fig6_case_studies_diagnostics():
         r'$\delta_{\mathrm{true}} = 430.0\ \mathrm{ppm},\ \Delta t_{\mathrm{TTV}} \sim \pm 8\ \mathrm{h}$' + '\n' +
         r'$\sigma_{\mathrm{out}} = 104.3\ \mathrm{ppm},\ \sigma_{\mathrm{in,res}} = 177.3\ \mathrm{ppm}$' + '\n' +
         r'$\psi_{\mathrm{corr}} = 0.700,\ \mathcal{P}_{\mathrm{corr}} = \mathbf{0.5306}$' + '\n' +
-        r'$\mathbf{Tier\ 3\ (Veto)}\ [\mathrm{Diagnostic\ Flag\ for\ TTVs}]$'
+        r'$\mathbf{Tier\ 2\ (Review)}\ [\mathrm{Diagnostic\ Flag\ for\ TTVs}]$'
     )
     ax2.text(0.04, 0.04, badge36_lin, transform=ax2.transAxes, fontsize=8.2, verticalalignment='bottom',
-             bbox=dict(boxstyle='round,pad=0.4', facecolor='#ffebee', edgecolor='#c62828', lw=1.2, alpha=0.92))
+             bbox=dict(boxstyle='round,pad=0.4', facecolor='#fff3e0', edgecolor='#f57c00', lw=1.2, alpha=0.92))
     ax2.legend(loc='upper right', fontsize=8, framealpha=0.9)
 
     # (c) Kepler-36 c: Dynamical
